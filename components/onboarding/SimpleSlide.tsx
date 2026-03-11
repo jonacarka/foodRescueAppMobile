@@ -1,0 +1,86 @@
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+
+type Props = {
+    title:string;
+    subtitle:string;
+};
+
+const APP_BG ='#0D1A63';
+const CARD_BG = 'rgba(255,255,255,0.08)';
+const TEXT_PRIMARY = '#FFFFFF';
+const TEXT_SECONDARY = 'rgba(255,255,255,0.78)';
+
+export default function SimpleSlide({title,subtitle} :Props){
+    return(
+        <View style={styles.wrapper}>
+            <View style={styles.illustration}>
+                <View style={styles.circleLarge} />
+                <View style={styles.circleSmall} />
+                <View style={styles.card}/>
+            </View>
+
+            <View style={styles.textBlock}>
+                <Text style={styles.title}>{title}</Text>
+                <Text style={styles.subtitle}>{subtitle}</Text>
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    wrapper:{
+        flex:1,
+        alignItems:'center',
+        justifyContent:'center',
+    },
+    illustration:{
+        width:290,
+        height:290,
+        alignItems:'center',
+        justifyContent:'center',
+        marginBottom:28,
+    },
+    circleLarge:{
+        position:'absolute',
+        width:230,
+        height:230,
+        borderRadius:999,
+        backgroundColor:'rgba(255,255,255,0.05)',
+    },
+    circleSmall:{
+        position:'absolute',
+        width:170,
+        height:170,
+        borderRadius:999,
+        backgroundColor:'rgba(255,255,255,0.08)',
+    },
+    card:{
+        width:136,
+        height:172,
+        borderRadius:28,
+        backgroundColor:CARD_BG,
+        borderWidth:1,
+        borderColor:'rgba(255,255,255,0.08)',
+    },
+    textBlock:{
+        alignItems:'center',
+        paddingHorizontal:12,
+    },
+    title:{
+        color:TEXT_PRIMARY,
+        fontSize:28,
+        lineHeight:34,
+        fontWeight:'800',
+        textAlign:'center',
+        maxWidth:320,
+    },
+    subtitle:{
+        color:TEXT_SECONDARY,
+        fontSize:15.5,
+        lineHeight:24,
+        textAlign:'center',
+        marginTop:12,
+        maxWidth:320,
+    },
+});
