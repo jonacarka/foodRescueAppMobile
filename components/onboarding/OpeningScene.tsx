@@ -17,23 +17,23 @@ const letters:{
     width:number;
     height:number;
 }[]=[
-    { key:'R',source:require('@/assets/images/onboarding/letters/r.png'),width:46,height:64},
-    { key:'e1',source:require('@/assets/images/onboarding/letters/e.png'),width:34,height:50},
-    { key:'P',source:require('@/assets/images/onboarding/letters/p.png'),width:38,height:60},
-    { key:'L',source:require('@/assets/images/onboarding/letters/l.png'),width:22,height:60},
-    { key:'A',source:require('@/assets/images/onboarding/letters/a.png'),width:38,height:50},
-    { key:'T',source:require('@/assets/images/onboarding/letters/t.png'),width:28,height:58},
-    { key:'e2',source:require('@/assets/images/onboarding/letters/e1.png'),width:34,height:50},
+    { key:'R',source:require('@/assets/images/onboarding/letters/r.png'),width:62,height:86},
+    { key:'e1',source:require('@/assets/images/onboarding/letters/e.png'),width:44,height:64},
+    { key:'P',source:require('@/assets/images/onboarding/letters/p.png'),width:50,height:78},
+    { key:'L',source:require('@/assets/images/onboarding/letters/l.png'),width:28,height:78},
+    { key:'A',source:require('@/assets/images/onboarding/letters/a.png'),width:50,height:64},
+    { key:'T',source:require('@/assets/images/onboarding/letters/t.png'),width:34,height:74},
+    { key:'e2',source:require('@/assets/images/onboarding/letters/e1.png'),width:44,height:64},
 ];
 
-const PLATE_DROP_START =-260;
-const LETTER_DROP_START =-220;
+const PLATE_DROP_START =-220;
+const LETTER_DROP_START =-180;
 
 export default function OpeningScene(){
     const{width} = useWindowDimensions();
 
-    const sceneWidth = Math.min(width -48,360);
-    const sceneHeight = 360;
+    const sceneWidth = Math.min(width -40,390);
+    const sceneHeight = 380;
 
     const plate1Y = useSharedValue(PLATE_DROP_START);
     const plate2Y = useSharedValue(PLATE_DROP_START);
@@ -45,15 +45,17 @@ export default function OpeningScene(){
 
   const letterY = letters.map(() => useSharedValue(LETTER_DROP_START));
   const letterOpacity = letters.map(() => useSharedValue(0));
-  const letterScale = letters.map(() => useSharedValue(0.96));
+  const letterScale = letters.map(() => useSharedValue(0.92));
 
-  const letterPositions = useMemo(() =>{
-    const gap = 2;
-     const totalWidth =
+  const letterPositions = useMemo(() => {
+    const gap = 4;
+    const totalWidth =
       letters.reduce((sum, item) => sum + item.width, 0) + gap * (letters.length - 1);
 
     const startX = (sceneWidth - totalWidth) / 2;
-    const baseY = 178;
+
+    // Shkronjat më lart, mbi pjatën e fundit
+    const baseY = 128;
 
     let currentX = startX;
 
@@ -71,38 +73,38 @@ export default function OpeningScene(){
   }, [sceneWidth]);
 
   useEffect(() => {
-    plate1Opacity.value = withDelay(80, withTiming(1, { duration: 220 }));
+    plate1Opacity.value = withDelay(80, withTiming(1, { duration: 240 }));
     plate1Y.value = withDelay(
       80,
       withSpring(0, {
-        damping: 16,
-        stiffness: 150,
-        mass: 0.95,
+        damping: 18,
+        stiffness: 135,
+        mass: 1,
       })
     );
 
-    plate2Opacity.value = withDelay(340, withTiming(1, { duration: 220 }));
+    plate2Opacity.value = withDelay(360, withTiming(1, { duration: 240 }));
     plate2Y.value = withDelay(
-      340,
+      360,
       withSpring(0, {
-        damping: 16,
-        stiffness: 150,
-        mass: 0.95,
+        damping: 18,
+        stiffness: 135,
+        mass: 1,
       })
     );
 
-    plate3Opacity.value = withDelay(620, withTiming(1, { duration: 220 }));
+    plate3Opacity.value = withDelay(650, withTiming(1, { duration: 240 }));
     plate3Y.value = withDelay(
-      620,
+      650,
       withSpring(0, {
-        damping: 16,
-        stiffness: 150,
-        mass: 0.95,
+        damping: 18,
+        stiffness: 135,
+        mass: 1,
       })
     );
 
     letters.forEach((_, index) => {
-      const delay = 1020 + index * 95;
+      const delay = 1080 + index * 110;
 
       letterOpacity[index].value = withDelay(
         delay,
@@ -115,9 +117,9 @@ export default function OpeningScene(){
       letterY[index].value = withDelay(
         delay,
         withSpring(0, {
-          damping: 18,
-          stiffness: 180,
-          mass: 0.9,
+          damping: 20,
+          stiffness: 170,
+          mass: 0.95,
         })
       );
 
@@ -133,7 +135,7 @@ export default function OpeningScene(){
 
   const plate1Style = useAnimatedStyle(() => ({
     opacity: plate1Opacity.value,
-    transform: [{ translateY: plate1Y.value }, { rotate: '-4deg' }],
+    transform: [{ translateY: plate1Y.value }, { rotate: '-3deg' }],
   }));
 
   const plate2Style = useAnimatedStyle(() => ({
@@ -148,48 +150,51 @@ export default function OpeningScene(){
 
   return (
     <View style={[styles.scene, { width: sceneWidth, height: sceneHeight }]}>
+      {/* Pjata e poshtme */}
       <Animated.Image
         source={plateSource}
         resizeMode="contain"
         style={[
           styles.plate,
           {
-            width: sceneWidth * 0.86,
-            height: sceneWidth * 0.46,
-            left: sceneWidth * 0.07,
-            top: 138,
+            width: sceneWidth * 0.82,
+            height: sceneWidth * 0.40,
+            left: sceneWidth * 0.09,
+            top: 166,
             zIndex: 1,
           },
           plate1Style,
         ]}
       />
 
+      {/* Pjata e mesit */}
       <Animated.Image
         source={plateSource}
         resizeMode="contain"
         style={[
           styles.plate,
           {
-            width: sceneWidth * 0.74,
-            height: sceneWidth * 0.40,
-            left: sceneWidth * 0.13,
-            top: 120,
+            width: sceneWidth * 0.70,
+            height: sceneWidth * 0.34,
+            left: sceneWidth * 0.15,
+            top: 126,
             zIndex: 2,
           },
           plate2Style,
         ]}
       />
 
+      {/* Pjata e sipërme */}
       <Animated.Image
         source={plateSource}
         resizeMode="contain"
         style={[
           styles.plate,
           {
-            width: sceneWidth * 0.64,
-            height: sceneWidth * 0.34,
-            left: sceneWidth * 0.18,
-            top: 104,
+            width: sceneWidth * 0.58,
+            height: sceneWidth * 0.29,
+            left: sceneWidth * 0.21,
+            top: 88,
             zIndex: 3,
           },
           plate3Style,
