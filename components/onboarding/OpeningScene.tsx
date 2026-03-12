@@ -5,6 +5,8 @@ import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withDelay,
+    withRepeat,
+    withSequence,
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
@@ -17,22 +19,22 @@ const letters:{
     width:number;
     height:number;
 }[]=[
-    { key:'R',source:require('@/assets/images/onboarding/letters/r.png'),width:62,height:86},
-    { key:'e1',source:require('@/assets/images/onboarding/letters/e.png'),width:44,height:64},
-    { key:'P',source:require('@/assets/images/onboarding/letters/p.png'),width:50,height:78},
-    { key:'L',source:require('@/assets/images/onboarding/letters/l.png'),width:28,height:78},
-    { key:'A',source:require('@/assets/images/onboarding/letters/a.png'),width:50,height:64},
-    { key:'T',source:require('@/assets/images/onboarding/letters/t.png'),width:34,height:74},
-    { key:'e2',source:require('@/assets/images/onboarding/letters/e1.png'),width:44,height:64},
+    { key:'R',source:require('@/assets/images/onboarding/letters/r.png'),width:86,height:120},
+    { key:'e1',source:require('@/assets/images/onboarding/letters/e.png'),width:60,height:90},
+    { key:'P',source:require('@/assets/images/onboarding/letters/p.png'),width:68,height:104},
+    { key:'L',source:require('@/assets/images/onboarding/letters/l.png'),width:34,height:104},
+    { key:'A',source:require('@/assets/images/onboarding/letters/a.png'),width:68,height:90},
+    { key:'T',source:require('@/assets/images/onboarding/letters/t.png'),width:40,height:100},
+    { key:'e2',source:require('@/assets/images/onboarding/letters/e1.png'),width:60,height:90},
 ];
 
-const PLATE_DROP_START =-220;
-const LETTER_DROP_START =-180;
+const PLATE_DROP_START =-260;
+// const LETTER_DROP_START =-180;
 
 export default function OpeningScene(){
     const{width} = useWindowDimensions();
 
-    const sceneWidth = Math.min(width -40,390);
+    const sceneWidth = Math.min(width -32,400);
     const sceneHeight = 380;
 
     const plate1Y = useSharedValue(PLATE_DROP_START);
@@ -43,9 +45,13 @@ export default function OpeningScene(){
   const plate2Opacity = useSharedValue(0);
   const plate3Opacity = useSharedValue(0);
 
-  const letterY = letters.map(() => useSharedValue(LETTER_DROP_START));
-  const letterOpacity = letters.map(() => useSharedValue(0));
-  const letterScale = letters.map(() => useSharedValue(0.92));
+  const plate1FloatX = useSharedValue(0);
+   const plate2FloatX = useSharedValue(0);
+    const plate3FloatX = useSharedValue(0);
+
+  const letterY = useSharedValue(12);
+  const letterOpacity = useSharedValue(0);
+  const letterScale = useSharedValue(0.94);
 
   const letterPositions = useMemo(() => {
     const gap = 4;
@@ -55,7 +61,7 @@ export default function OpeningScene(){
     const startX = (sceneWidth - totalWidth) / 2;
 
     // Shkronjat më lart, mbi pjatën e fundit
-    const baseY = 128;
+    const baseY = 86;
 
     let currentX = startX;
 
@@ -73,79 +79,136 @@ export default function OpeningScene(){
   }, [sceneWidth]);
 
   useEffect(() => {
-    plate1Opacity.value = withDelay(80, withTiming(1, { duration: 240 }));
+    plate1Opacity.value = withDelay(80, withTiming(1, { duration: 220 }));
     plate1Y.value = withDelay(
       80,
       withSpring(0, {
-        damping: 18,
+        damping: 17,
         stiffness: 135,
         mass: 1,
       })
     );
 
-    plate2Opacity.value = withDelay(360, withTiming(1, { duration: 240 }));
+    plate2Opacity.value = withDelay(360, withTiming(1, { duration: 220 }));
     plate2Y.value = withDelay(
       360,
       withSpring(0, {
-        damping: 18,
+        damping: 17,
         stiffness: 135,
         mass: 1,
       })
     );
 
-    plate3Opacity.value = withDelay(650, withTiming(1, { duration: 240 }));
+    plate3Opacity.value = withDelay(660, withTiming(1, { duration: 220 }));
     plate3Y.value = withDelay(
-      650,
+      660,
       withSpring(0, {
-        damping: 18,
+        damping: 17,
         stiffness: 135,
         mass: 1,
       })
     );
 
-    letters.forEach((_, index) => {
-      const delay = 1080 + index * 110;
+    plate1FloatX.value = withDelay(
+        1200,
+        withRepeat(
+            withSequence(
+                withTiming(-8,{duration:1800,easing:Easing.inOut(Easing.sin)}),
+                withTiming(8,{duration :1800,easing: Easing.inOut(Easing.sin)})
+            ),
+            -1,
+            true
+        )
+    );
 
-      letterOpacity[index].value = withDelay(
-        delay,
-        withTiming(1, {
-          duration: 180,
-          easing: Easing.out(Easing.quad),
-        })
-      );
+     plate2FloatX.value = withDelay(
+        1280,
+        withRepeat(
+            withSequence(
+                withTiming(7,{duration:2000,easing:Easing.inOut(Easing.sin)}),
+                withTiming(-7,{duration :2000,easing: Easing.inOut(Easing.sin)})
+            ),
+            -1,
+            true
+        )
+    );
+     plate3FloatX.value = withDelay(
+        1360,
+        withRepeat(
+            withSequence(
+                withTiming(-6,{duration:1900,easing:Easing.inOut(Easing.sin)}),
+                withTiming(6,{duration :1900,easing: Easing.inOut(Easing.sin)})
+            ),
+            -1,
+            true
+        )
+    );
 
-      letterY[index].value = withDelay(
-        delay,
-        withSpring(0, {
-          damping: 20,
-          stiffness: 170,
-          mass: 0.95,
+    letterOpacity.value = withDelay(
+        1180,
+        withTiming(1,{
+            duration:420,
+            easing:Easing.out(Easing.quad),
         })
-      );
+    );
 
-      letterScale[index].value = withDelay(
-        delay,
-        withTiming(1, {
-          duration: 220,
-          easing: Easing.out(Easing.quad),
+    letterScale.value = withDelay(
+        1180,
+        withTiming(1,{
+            duration:420,
+            easing:Easing.out(Easing.quad),
         })
-      );
-    });
-  }, [letterOpacity, letterScale, letterY, plate1Opacity, plate1Y, plate2Opacity, plate2Y, plate3Opacity, plate3Y]);
+    );
+
+    letterY.value = withDelay(
+        1180,
+        withTiming(0,{
+            duration:420,
+            easing:Easing.out(Easing.quad),
+        })
+    );
+  },[
+    letterOpacity,
+    letterScale,
+    letterY,
+    plate1FloatX,
+    plate1Opacity,
+    plate1Y,
+    plate2FloatX,
+    plate2Opacity,
+    plate2Y,
+    plate3FloatX,
+    plate3Opacity,
+    plate3Y,
+
+  ]);
 
   const plate1Style = useAnimatedStyle(() => ({
     opacity: plate1Opacity.value,
-    transform: [{ translateY: plate1Y.value }, { rotate: '-3deg' }],
+    transform: [{ translateY: plate1Y.value }, 
+        {translateX:plate1FloatX.value},
+        {rotate:'-2deg'},
+    ],
   }));
 
   const plate2Style = useAnimatedStyle(() => ({
     opacity: plate2Opacity.value,
-    transform: [{ translateY: plate2Y.value }, { rotate: '1.2deg' }],
+    transform: [{ translateY: plate2Y.value }, 
+        {translateX:plate2FloatX.value},
+        { rotate: '1deg' }],
   }));
 
   const plate3Style = useAnimatedStyle(() => ({
     opacity: plate3Opacity.value,
-    transform: [{ translateY: plate3Y.value }, { rotate: '-1deg' }],
+    transform: [{ translateY: plate3Y.value },{
+        translateX:plate3FloatX.value
+    }, 
+        { rotate: '-1deg' }],
+  }));
+
+  const lettersGroupStyle = useAnimatedStyle(() =>({
+    opacity: letterOpacity.value,
+    transform:[{translateY:letterY.value},{scale:letterScale.value}],
   }));
 
   return (
@@ -157,10 +220,10 @@ export default function OpeningScene(){
         style={[
           styles.plate,
           {
-            width: sceneWidth * 0.82,
+            width: sceneWidth * 0.84,
             height: sceneWidth * 0.40,
-            left: sceneWidth * 0.09,
-            top: 166,
+            left: sceneWidth * 0.08,
+            top: 182,
             zIndex: 1,
           },
           plate1Style,
@@ -175,9 +238,9 @@ export default function OpeningScene(){
           styles.plate,
           {
             width: sceneWidth * 0.70,
-            height: sceneWidth * 0.34,
+            height: sceneWidth * 0.33,
             left: sceneWidth * 0.15,
-            top: 126,
+            top: 136,
             zIndex: 2,
           },
           plate2Style,
@@ -191,47 +254,40 @@ export default function OpeningScene(){
         style={[
           styles.plate,
           {
-            width: sceneWidth * 0.58,
-            height: sceneWidth * 0.29,
-            left: sceneWidth * 0.21,
-            top: 88,
+            width: sceneWidth * 0.56,
+            height: sceneWidth * 0.27,
+            left: sceneWidth * 0.22,
+            top: 94,
             zIndex: 3,
           },
           plate3Style,
         ]}
       />
 
-      {letters.map((letter, index) => {
-        const animatedLetterStyle = useAnimatedStyle(() => ({
-          opacity: letterOpacity[index].value,
-          transform: [
-            { translateY: letterY[index].value },
-            { scale: letterScale[index].value },
-          ],
-        }));
+      <Animated.View style = {[styles.lettersGroup,lettersGroupStyle]}>
+        {letters.map((letter,index) => {
+            const position = letterPositions[index];
 
-        const position = letterPositions[index];
-
-        return (
-          <Animated.Image
-            key={letter.key}
-            source={letter.source}
-            resizeMode="contain"
-            style={[
-              styles.letter,
-              {
-                width: position.width,
-                height: position.height,
-                left: position.left,
-                top: position.top,
-                zIndex: 10 + index,
-              },
-              animatedLetterStyle,
-            ]}
-          />
-        );
-      })}
-    </View>
+            return(
+                <Animated.Image
+                key={letter.key}
+                source={letter.source}
+                resizeMode="contain"
+                style={[
+                    styles.letter,
+                    {
+                        width:position.width,
+                        height:position.height,
+                        left:position.left,
+                        top:position.top,
+                        zIndex: 10 + index,
+                    },
+                ]}
+                />
+            );
+        })}
+      </Animated.View>
+</View>
   );
 }
 
@@ -243,6 +299,9 @@ const styles = StyleSheet.create({
   },
   plate: {
     position: 'absolute',
+  },
+  lettersGroup:{
+    ...StyleSheet.absoluteFillObject,
   },
   letter: {
     position: 'absolute',

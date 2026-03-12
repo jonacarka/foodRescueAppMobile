@@ -164,12 +164,12 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   heroTop: {
-    flex: 0.58,
+    flex: 0.60,
     justifyContent: 'center',
     alignItems: 'center',
   },
   textBlock: {
-    flex: 0.42,
+    flex: 0.40,
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingTop: 6,
