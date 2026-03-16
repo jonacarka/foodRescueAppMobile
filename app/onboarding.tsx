@@ -1,16 +1,17 @@
 import { router, Stack } from 'expo-router';
 import React, { useMemo, useRef, useState } from 'react';
 import {
-    FlatList,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
-    Pressable,
-    StyleSheet,
-    Text,
-    useWindowDimensions,
-    View,
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import BrandIntro from '../components/onboarding/BrandIntro';
 import OpeningScene from '../components/onboarding/OpeningScene';
 import SimpleSlide from '../components/onboarding/SimpleSlide';
 
@@ -30,6 +31,7 @@ export default function OnBoardingScreen() {
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<Slide>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const[showBrandIntro,setShowBrandIntro]=useState(true);
 
   const slides = useMemo<Slide[]>(
     () => [
@@ -77,6 +79,15 @@ export default function OnBoardingScreen() {
   const handleSkip = () => {
     router.replace('/(auth)/register' as never);
   };
+
+  if(showBrandIntro){
+    return(
+      <SafeAreaView style={styles.safeArea}>
+        <Stack.Screen options={{headerShown:false}} />
+        <BrandIntro onFinish={() => setShowBrandIntro(false)} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
