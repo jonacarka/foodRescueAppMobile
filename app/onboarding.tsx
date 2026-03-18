@@ -24,6 +24,7 @@ type Slide = {
   title: string;
   subtitle: string;
   kind: 'hero' | 'simple';
+  variant?: 'burger' | 'default';
 };
 
 const APP_BG = '#0D1A63';
@@ -87,6 +88,7 @@ export default function OnBoardingScreen() {
       {
         id: '2',
         kind: 'simple',
+        variant:'burger',
         title: 'Find good food nearby',
         subtitle:
           'Discover surplus meals from local businesses in a simple and fast way.',
@@ -94,6 +96,7 @@ export default function OnBoardingScreen() {
       {
         id: '3',
         kind: 'simple',
+        variant:'default',
         title: 'Save more, waste less',
         subtitle:
           'Pick up quality food, save money, and help reduce food waste every day.',
@@ -166,7 +169,10 @@ export default function OnBoardingScreen() {
                   </View>
                 </>
               ) : (
-                <SimpleSlide title={item.title} subtitle={item.subtitle} />
+                <SimpleSlide 
+                title={item.title}
+                 subtitle={item.subtitle}
+                 variant={item.variant ?? 'default'} />
               )}
             </View>
           )}
