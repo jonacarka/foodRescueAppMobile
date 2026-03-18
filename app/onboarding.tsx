@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import React, { useMemo, useRef, useState } from 'react';
 import {
@@ -10,6 +11,9 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import Animated, {
+  Easing, useAnimatedStyle, withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BrandIntro from '../components/onboarding/BrandIntro';
 import OpeningScene from '../components/onboarding/OpeningScene';
@@ -25,7 +29,46 @@ type Slide = {
 const APP_BG = '#0D1A63';
 const TEXT_PRIMARY = '#FFFFFF';
 const TEXT_SECONDARY = 'rgba(255,255,255,0.78)';
-const DOT_INACTIVE = 'rgba(255,255,255,0.24)';
+const DOT_INACTIVE = 'rgba(255,255,255,0.22)';
+
+type DotProps = {
+  active:boolean;
+};
+
+function PaginationDot({active} : DotProps){
+  const animatedStyle = useAnimatedStyle(() =>{
+    return{
+      width:withTiming(active ? 26 : 8,{
+        duration:260,
+        easing:Easing.out(Easing.cubic),
+      }),
+      opacity:withTiming(active ? 1 : 0.9,{
+        duration:220,
+        easing:Easing.out(Easing.cubic),
+      }),
+      transform:[
+        {
+          scale:withTiming(active ? 1 : 0.95,{
+            duration:220,
+            easing:Easing.out(Easing.cubic),
+          }),
+        },
+      ],
+    };
+  },[active]);
+
+  return(
+    <Animated.View
+    style={[
+      styles.dot,
+      animatedStyle,
+      {
+        backgroundColor:active ? TEXT_PRIMARY : DOT_INACTIVE,
+      },
+    ]}
+    />
+  );
+}
 
 export default function OnBoardingScreen() {
   const { width } = useWindowDimensions();
@@ -94,6 +137,12 @@ export default function OnBoardingScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={styles.container}>
+        <View style={styles.topBar}>
+          <Pressable onPress={handleSkip} hitSlop={10} style={styles.skipTopButton}>
+            <Text style = {styles.skipTopText}>Skip</Text>
+          </Pressable>
+        </View>
+
         <FlatList
           ref={listRef}
           data={slides}
@@ -125,38 +174,25 @@ export default function OnBoardingScreen() {
 
         <View style={styles.footer}>
           <View style={styles.dotsRow}>
-            {slides.map((slide, index) => {
-              const active = index === currentIndex;
+            {slides.map((slide, index) => (
+              <PaginationDot key={slide.id} active={index === currentIndex} />
+            ))}
+            </View>
+             
+             <View style={styles.bottomRow}>
+              <View style={styles.footerSpacer} />
 
-              return (
-                <View
-                  key={slide.id}
-                  style={[
-                    styles.dot,
-                    {
-                      width: active ? 26 : 8,
-                      backgroundColor: active ? TEXT_PRIMARY : DOT_INACTIVE,
-                    },
-                  ]}
+              <Pressable onPress={handleNext} style={styles.arrowButton}>
+                <Ionicons
+                name={currentIndex === slides.length - 1 ? 'checkmark' : 'arrow-forward'}
+                size={22}
+                color={APP_BG}
                 />
-              );
-            })}
-          </View>
-
-          <View style={styles.actionsRow}>
-            <Pressable onPress={handleSkip} style={styles.skipButton}>
-              <Text style={styles.skipText}>Skip</Text>
-            </Pressable>
-
-            <Pressable onPress={handleNext} style={styles.nextButton}>
-              <Text style={styles.nextText}>
-                {currentIndex === slides.length - 1 ? 'Get Started' : 'Next'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </SafeAreaView>
+              </Pressable>
+             </View>
+             </View>
+             </View>
+             </SafeAreaView>
   );
 }
 
@@ -169,10 +205,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: APP_BG,
   },
+  topBar:{
+    paddingTop:6,
+    paddingHorizontal:24,
+    alignItems:'flex-end',
+  },
+  skipTopButton:{
+    paddingVertical:6,
+    paddingHorizontal:4,
+  },
+  skipTopText:{
+    color:'rgba(255,255,255,0.72)',
+    fontSize:15,
+    fontFamily:'Nunito_700Bold',
+  },
   slide: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 8,
+    paddingTop: 4,
   },
   heroTop: {
     flex: 0.60,
@@ -183,23 +233,24 @@ const styles = StyleSheet.create({
     flex: 0.40,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingTop: 6,
+    paddingTop: 8,
   },
   title: {
     color: TEXT_PRIMARY,
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: '800',
+    fontSize: 30,
+    lineHeight: 37,
     textAlign: 'center',
-    maxWidth: 320,
+    maxWidth: 325,
+    fontFamily:'Nunito_800ExtraBold',
   },
   subtitle: {
     color: TEXT_SECONDARY,
-    fontSize: 15.5,
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 25,
     textAlign: 'center',
     marginTop: 12,
     maxWidth: 320,
+    fontFamily:'Nunito_500Medium',
   },
   footer: {
     paddingHorizontal: 24,
@@ -215,6 +266,22 @@ const styles = StyleSheet.create({
   dot: {
     height: 8,
     borderRadius: 999,
+  },
+  bottomRow:{
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'space-between',
+  },
+  footerSpacer:{
+    width:52,
+  },
+  arrowButton:{
+    width:58,
+    height:58,
+    borderRadius:999,
+    backgroundColor:'#FFFFFF',
+    alignItems:'center',
+    justifyContent:'center',
   },
   actionsRow: {
     flexDirection: 'row',
