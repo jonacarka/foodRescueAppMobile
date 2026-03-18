@@ -183,7 +183,7 @@ export default function BurgerScene(){
             transform:[
                 {translateY:lettuceY.value + lettuceFloatY.value},
                 {translateX:lettuceFloatX.value},
-                {rotate:"3deg"},
+                {rotate:"-15deg"},
             ],
           }));
 
@@ -192,7 +192,7 @@ export default function BurgerScene(){
             transform:[
                 {translateY:tomatoY.value + tomatoFloatY.value},
                 {translateX:tomatoFloatX.value},
-                {rotate:"-3deg"},
+                {rotate:"-15deg"},
             ],
           }));
 
@@ -210,7 +210,7 @@ export default function BurgerScene(){
             transform:[
                 {translateY:cheeseY.value + cheeseFloatY.value},
                 {translateX:cheeseFloatX.value},
-                {rotate:"-2deg"},
+                {rotate:"-5deg"},
             ],
           }));
 
@@ -239,9 +239,9 @@ return (
         style={[
           styles.layer,
           {
-            width: sceneWidth * 0.72,
-            height: sceneWidth * 0.28,
-            top: 236,
+            width: sceneWidth * 0.75,
+            height: sceneWidth * 0.30,
+            top: 240,
             left: sceneWidth * 0.14,
             zIndex: 1,
           },
@@ -255,8 +255,8 @@ return (
         style={[
           styles.layer,
           {
-            width: sceneWidth * 0.60,
-            height: sceneWidth * 0.22,
+            width: sceneWidth * 0.64,
+            height: sceneWidth * 0.30,
             top: 198,
             left: sceneWidth * 0.20,
             zIndex: 2,
@@ -272,8 +272,8 @@ return (
           styles.layer,
           {
             width: sceneWidth * 0.52,
-            height: sceneWidth * 0.19,
-            top: 165,
+            height: sceneWidth * 0.30,
+            top: 167,
             left: sceneWidth * 0.24,
             zIndex: 3,
           },
@@ -288,7 +288,7 @@ return (
           styles.layer,
           {
             width: sceneWidth * 0.46,
-            height: sceneWidth * 0.17,
+            height: sceneWidth * 0.30,
             top: 136,
             left: sceneWidth * 0.27,
             zIndex: 4,
@@ -304,7 +304,7 @@ return (
           styles.layer,
           {
             width: sceneWidth * 0.48,
-            height: sceneWidth * 0.17,
+            height: sceneWidth * 0.30,
             top: 105,
             left: sceneWidth * 0.26,
             zIndex: 5,
@@ -320,7 +320,7 @@ return (
           styles.layer,
           {
             width: sceneWidth * 0.58,
-            height: sceneWidth * 0.20,
+            height: sceneWidth * 0.30,
             top: 70,
             left: sceneWidth * 0.21,
             zIndex: 6,
@@ -336,8 +336,8 @@ return (
           styles.layer,
           {
             width: sceneWidth * 0.66,
-            height: sceneWidth * 0.26,
-            top: 22,
+            height: sceneWidth * 0.38,
+            top: 2,
             left: sceneWidth * 0.17,
             zIndex: 7,
           },
