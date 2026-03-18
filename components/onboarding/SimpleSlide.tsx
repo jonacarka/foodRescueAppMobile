@@ -6,7 +6,7 @@ type Props = {
     subtitle:string;
 };
 
-const APP_BG ='#0D1A63';
+// const APP_BG ='#0D1A63';
 const CARD_BG = 'rgba(255,255,255,0.08)';
 const TEXT_PRIMARY = '#FFFFFF';
 const TEXT_SECONDARY = 'rgba(255,255,255,0.78)';
@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
         flex:1,
         alignItems:'center',
         justifyContent:'center',
+        paddingBottom:8,
     },
     illustration:{
         width:290,
@@ -69,18 +70,19 @@ const styles = StyleSheet.create({
     },
     title:{
         color:TEXT_PRIMARY,
-        fontSize:28,
-        lineHeight:34,
-        fontWeight:'800',
+        fontSize:30,
+        lineHeight:37,
         textAlign:'center',
         maxWidth:320,
+        fontFamily:'Nunito_800ExtraBold',
     },
     subtitle:{
         color:TEXT_SECONDARY,
-        fontSize:15.5,
-        lineHeight:24,
+        fontSize:16,
+        lineHeight:25,
         textAlign:'center',
         marginTop:12,
         maxWidth:320,
+        fontFamily:'Nunito_500Medium',
     },
 });
