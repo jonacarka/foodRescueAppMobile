@@ -13,7 +13,7 @@ import Animated, {
 
 const plateSource = require("@/assets/images/onboarding/platefinalFinal.png");
 
-const PLATE_DROP_START = -260;
+const PLATE_DROP_START = -90;
 
 export default function OpeningScene() {
   const { width } = useWindowDimensions();
@@ -34,33 +34,33 @@ export default function OpeningScene() {
   const plate3FloatX = useSharedValue(0);
 
   useEffect(() => {
-    plate1Opacity.value = withDelay(80, withTiming(1, { duration: 220 }));
+    plate1Opacity.value = withDelay(80, withTiming(1, { duration: 320 }));
     plate1Y.value = withDelay(
       80,
       withSpring(0, {
-        damping: 17,
-        stiffness: 135,
-        mass: 1,
+        damping: 24,
+        stiffness: 75,
+        mass: 1.15,
       })
     );
 
-    plate2Opacity.value = withDelay(360, withTiming(1, { duration: 220 }));
+    plate2Opacity.value = withDelay(360, withTiming(1, { duration: 320 }));
     plate2Y.value = withDelay(
       360,
       withSpring(0, {
-        damping: 17,
-        stiffness: 135,
-        mass: 1,
+        damping: 24,
+        stiffness:75,
+        mass: 1.15,
       })
     );
 
-    plate3Opacity.value = withDelay(660, withTiming(1, { duration: 220 }));
+    plate3Opacity.value = withDelay(660, withTiming(1, { duration: 320 }));
     plate3Y.value = withDelay(
       660,
       withSpring(0, {
-        damping: 17,
-        stiffness: 135,
-        mass: 1,
+        damping: 24,
+        stiffness: 75,
+        mass: 1.15,
       })
     );
 
