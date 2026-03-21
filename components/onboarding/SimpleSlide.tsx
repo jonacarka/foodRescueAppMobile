@@ -1,11 +1,12 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import BagScene from "./BagScene";
 import BurgerScene from "./BurgerScene";
 
 type Props = {
   title: string;
   subtitle: string;
-  variant?: "burger" | "default";
+  variant?: "burger" | "bag" | "default";
 };
 
 const CARD_BG = "rgba(255,255,255,0.08)";
@@ -22,7 +23,9 @@ export default function SimpleSlide({
       <View style={styles.illustration}>
         {variant === "burger" ? (
           <BurgerScene />
-        ) : (
+        ) : variant === "bag" ? (
+            <BagScene/>
+        ):(
           <>
             <View style={styles.circleLarge} />
             <View style={styles.circleSmall} />

@@ -24,7 +24,7 @@ type Slide = {
   title: string;
   subtitle: string;
   kind: 'hero' | 'simple';
-  variant?: 'burger' | 'default';
+  variant?: 'burger' | 'bag' | 'default';
 };
 
 const APP_BG = '#0D1A63';
@@ -96,7 +96,7 @@ export default function OnBoardingScreen() {
       {
         id: '3',
         kind: 'simple',
-        variant:'default',
+        variant:'bag',
         title: 'Save more, waste less',
         subtitle:
           'Pick up quality food, save money, and help reduce food waste every day.',
