@@ -183,7 +183,7 @@ export default function BurgerScene(){
             transform:[
                 {translateY:lettuceY.value + lettuceFloatY.value},
                 {translateX:lettuceFloatX.value},
-                {rotate:"-15deg"},
+                {rotate:"-45deg"},
             ],
           }));
 
@@ -304,8 +304,8 @@ return (
           styles.layer,
           {
             width: sceneWidth * 0.48,
-            height: sceneWidth * 0.30,
-            top: 105,
+            height: sceneWidth * 0.33,
+            top: 107,
             left: sceneWidth * 0.26,
             zIndex: 5,
           },
@@ -320,7 +320,7 @@ return (
           styles.layer,
           {
             width: sceneWidth * 0.58,
-            height: sceneWidth * 0.30,
+            height: sceneWidth * 0.34,
             top: 70,
             left: sceneWidth * 0.21,
             zIndex: 6,
@@ -336,8 +336,8 @@ return (
           styles.layer,
           {
             width: sceneWidth * 0.66,
-            height: sceneWidth * 0.38,
-            top: 2,
+            height: sceneWidth * 0.395,
+            top: 1,
             left: sceneWidth * 0.17,
             zIndex: 7,
           },
