@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, {
-    Easing,
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withRepeat,
-    withSequence,
-    withSpring,
-    withTiming,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 const bunTopSource = require("@/assets/images/onboarding/burger/bunTop.png");
@@ -232,7 +232,9 @@ export default function BurgerScene(){
             ],
           }));
 return (
-    <View style={[styles.scene, { width: sceneWidth, height: sceneHeight }]}>
+    <View 
+    pointerEvents="none"
+    style={[styles.scene, { width: sceneWidth, height: sceneHeight }]}>
       <Animated.Image
         source={bunBottomSource}
         resizeMode="contain"

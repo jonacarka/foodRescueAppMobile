@@ -111,6 +111,8 @@ export default function OnBoardingScreen() {
   };
 
   const handleNext = () => {
+    console.log("NEXT PRESSED");
+
     if (currentIndex < slides.length - 1) {
       listRef.current?.scrollToIndex({
         index: currentIndex + 1,
@@ -188,7 +190,7 @@ export default function OnBoardingScreen() {
              <View style={styles.bottomRow}>
               <View style={styles.footerSpacer} />
 
-              <Pressable onPress={handleNext} style={styles.arrowButton}>
+              <Pressable onPress={handleNext} hitSlop={12} style={styles.arrowButton}>
                 <Ionicons
                 name={currentIndex === slides.length - 1 ? 'checkmark' : 'arrow-forward'}
                 size={22}

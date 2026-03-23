@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, {
-    Easing,
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withRepeat,
-    withSequence,
-    withTiming,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from "react-native-reanimated";
 
 const bagFullSource = require("@/assets/images/onboarding/bag/bagFull.png");
@@ -100,7 +100,9 @@ export default function BagScene() {
   }));
 
   return (
-    <View style={[styles.scene, { width: sceneWidth, height: sceneHeight }]}>
+    <View 
+    pointerEvents="none"
+    style={[styles.scene, { width: sceneWidth, height: sceneHeight }]}>
       <Animated.Image
         source={bagFullSource}
         resizeMode="contain"
