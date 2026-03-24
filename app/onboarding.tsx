@@ -121,7 +121,7 @@ export default function OnBoardingScreen() {
       return;
     }
 
-    router.replace('/(auth)/login' as never);
+    router.replace('/(auth)/role-selection' as never);
   };
 
   const handleSkip = () => {

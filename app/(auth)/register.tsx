@@ -1,7 +1,8 @@
 import { authService } from "@/services/authService";
 import { UserRole } from "@/types/auth";
+import { getPendingRole } from "@/utils/authFlowStorage";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
@@ -22,24 +23,22 @@ const COLORS = {
   textMuted: "#6B7280",
   border: "#D9E2F2",
   primary: "#163BB8",
-  primarySoft: "#EEF4FF",
   white: "#FFFFFF",
 };
-
-const PUBLIC_ROLES: { label: string; value: UserRole; desc: string }[] = [
-  { label: "Customer", value: "CUSTOMER", desc: "Save good food nearby" },
-  { label: "Business", value: "BUSINESS", desc: "Offer surplus food" },
-  { label: "NGO", value: "NGO", desc: "Support redistribution" },
-  { label: "Courier", value: "COURIER", desc: "Help with deliveries" },
-];
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("CUSTOMER");
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("CUSTOMER");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getPendingRole().then((role) => {
+      if (role) setSelectedRole(role);
+    });
+  }, []);
 
   const passwordValid =
     password.length >= 8 &&
@@ -68,10 +67,7 @@ export default function RegisterScreen() {
         role: selectedRole,
       });
 
-      router.push({
-        pathname: "/(auth)/verify-email",
-        params: { email: result.email },
-      });
+      router.push(`/(auth)/verify-email?email=${encodeURIComponent(result.email)}` as any);
     } catch (error: any) {
       Alert.alert("Register failed", error?.message || "Please try again.");
     } finally {
@@ -90,36 +86,11 @@ export default function RegisterScreen() {
             <Text style={styles.badge}>Replate</Text>
             <Text style={styles.title}>Create your account</Text>
             <Text style={styles.subtitle}>
-              Join the platform and make every meal matter.
+              You’re joining as <Text style={styles.roleText}>{selectedRole}</Text>.
             </Text>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Choose your role</Text>
-
-            {PUBLIC_ROLES.map((role) => {
-              const active = selectedRole === role.value;
-
-              return (
-                <Pressable
-                  key={role.value}
-                  onPress={() => setSelectedRole(role.value)}
-                  style={[styles.roleCard, active && styles.roleCardActive]}
-                >
-                  <View style={styles.roleTextWrap}>
-                    <Text style={[styles.roleLabel, active && styles.roleLabelActive]}>
-                      {role.label}
-                    </Text>
-                    <Text style={[styles.roleDesc, active && styles.roleDescActive]}>
-                      {role.desc}
-                    </Text>
-                  </View>
-
-                  <View style={[styles.radio, active && styles.radioActive]} />
-                </Pressable>
-              );
-            })}
-
             <Text style={styles.label}>Full name</Text>
             <TextInput
               value={fullName}
@@ -222,62 +193,15 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     maxWidth: 320,
   },
+  roleText: {
+    fontWeight: "800",
+    color: COLORS.white,
+  },
   card: {
     backgroundColor: COLORS.card,
     marginHorizontal: 16,
     borderRadius: 28,
     padding: 20,
-  },
-  sectionTitle: {
-    color: COLORS.textDark,
-    fontSize: 18,
-    fontWeight: "800",
-    marginBottom: 14,
-  },
-  roleCard: {
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 12,
-  },
-  roleCardActive: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primarySoft,
-  },
-  roleTextWrap: {
-    flex: 1,
-  },
-  roleLabel: {
-    color: COLORS.textDark,
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  roleLabelActive: {
-    color: COLORS.primary,
-  },
-  roleDesc: {
-    color: COLORS.textMuted,
-    marginTop: 4,
-    fontSize: 13,
-  },
-  roleDescActive: {
-    color: COLORS.primary,
-  },
-  radio: {
-    width: 18,
-    height: 18,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: COLORS.border,
-  },
-  radioActive: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary,
   },
   label: {
     color: COLORS.textDark,
