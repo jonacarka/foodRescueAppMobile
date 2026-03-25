@@ -14,13 +14,9 @@ import { useEffect } from 'react';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayer(){
+export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   const [fontsLoaded] = useFonts({
@@ -29,27 +25,28 @@ export default function RootLayer(){
     Nunito_800ExtraBold,
   });
 
-  useEffect(() =>{
-    if(fontsLoaded){
+  useEffect(() => {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  },[fontsLoaded]);
+  }, [fontsLoaded]);
 
-  if(!fontsLoaded){
+  if (!fontsLoaded) {
     return null;
   }
 
-  return(
+  return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{headerShown:false}} />
-        <Stack.Screen name="modal" options={{presentation: 'modal', title:'Modal'}} />
-
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(customer)" />
+        <Stack.Screen name="(business)" />
+        <Stack.Screen name="profile" />
+        <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: true, title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
 }
-
-
-
