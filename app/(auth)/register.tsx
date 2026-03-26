@@ -18,12 +18,17 @@ import {
 
 const COLORS = {
   bg: "#0D1A63",
-  card: "#FFFFFF",
+  surface: "#F8F8FB",
+  inputBg: "#FFFFFF",
   textDark: "#111827",
   textMuted: "#6B7280",
   border: "#D9E2F2",
   primary: "#163BB8",
+  primarySoft: "#6F83D6",
   white: "#FFFFFF",
+  badgeBg: "rgba(255,255,255,0.10)",
+  badgeBorder: "rgba(255,255,255,0.18)",
+  badgeText: "#F5F7FF",
 };
 
 export default function RegisterScreen() {
@@ -54,6 +59,23 @@ export default function RegisterScreen() {
     );
   }, [fullName, email, password, passwordValid]);
 
+  function formatRole(role: UserRole) {
+    switch (role) {
+      case "CUSTOMER":
+        return "Customer";
+      case "BUSINESS":
+        return "Business";
+      case "NGO":
+        return "NGO";
+      case "COURIER":
+        return "Courier";
+      case "ADMIN":
+        return "Admin";
+      default:
+        return role;
+    }
+  }
+
   async function handleRegister() {
     if (!isValid || loading) return;
 
@@ -67,7 +89,9 @@ export default function RegisterScreen() {
         role: selectedRole,
       });
 
-      router.push(`/(auth)/verify-email?email=${encodeURIComponent(result.email)}` as any);
+      router.push(
+        `/(auth)/verify-email?email=${encodeURIComponent(result.email)}` as any
+      );
     } catch (error: any) {
       Alert.alert("Register failed", error?.message || "Please try again.");
     } finally {
@@ -81,56 +105,74 @@ export default function RegisterScreen() {
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scroll}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.hero}>
-            <Text style={styles.badge}>Replate</Text>
-            <Text style={styles.title}>Create your account</Text>
-            <Text style={styles.subtitle}>
-              You’re joining as <Text style={styles.roleText}>{selectedRole}</Text>.
-            </Text>
+            <Text style={styles.brand}>Replate</Text>
+
+            <View style={styles.headingBlock}>
+              <Text style={styles.title}>Create account</Text>
+
+              <View style={styles.roleBadge}>
+                <Text style={styles.roleBadgeText}>{formatRole(selectedRole)}</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.label}>Full name</Text>
-            <TextInput
-              value={fullName}
-              onChangeText={setFullName}
-              placeholder="Enter your full name"
-              placeholderTextColor={COLORS.textMuted}
-              style={styles.input}
-            />
-
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              placeholderTextColor={COLORS.textMuted}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-            />
-
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordWrap}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Full name</Text>
               <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Create a secure password"
+                value={fullName}
+                onChangeText={setFullName}
+                placeholder="Enter your full name"
                 placeholderTextColor={COLORS.textMuted}
-                secureTextEntry={!showPassword}
-                style={styles.passwordInput}
+                style={styles.input}
+                autoCapitalize="words"
               />
-              <Pressable onPress={() => setShowPassword((v) => !v)}>
-                <Text style={styles.toggleText}>
-                  {showPassword ? "Hide" : "Show"}
-                </Text>
-              </Pressable>
             </View>
 
-            <Text style={styles.hint}>
-              Use at least 8 characters, including uppercase, lowercase, and a number.
-            </Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                placeholderTextColor={COLORS.textMuted}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.input}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Password</Text>
+
+              <View style={styles.passwordWrap}>
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Create your password"
+                  placeholderTextColor={COLORS.textMuted}
+                  secureTextEntry={!showPassword}
+                  style={styles.passwordInput}
+                />
+
+                <Pressable
+                  onPress={() => setShowPassword((v) => !v)}
+                  hitSlop={10}
+                >
+                  <Text style={styles.toggleText}>
+                    {showPassword ? "Hide" : "Show"}
+                  </Text>
+                </Pressable>
+              </View>
+
+              <Text style={styles.hint}>8+ chars, upper, lower, number</Text>
+            </View>
 
             <Pressable
               onPress={handleRegister}
@@ -167,104 +209,124 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scroll: {
-    paddingBottom: 32,
+    flexGrow: 1,
+    paddingBottom: 28,
   },
+
   hero: {
-    paddingTop: 34,
+    paddingTop: 26,
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingBottom: 22,
   },
-  badge: {
+  brand: {
     color: COLORS.white,
-    fontSize: 14,
-    fontWeight: "700",
-    marginBottom: 12,
-    opacity: 0.9,
+    fontSize: 15,
+    fontWeight: "800",
+    letterSpacing: 0.2,
+    opacity: 0.96,
+    marginBottom: 18,
+  },
+  headingBlock: {
+    gap: 12,
   },
   title: {
     color: COLORS.white,
-    fontSize: 30,
+    fontSize: 34,
+    lineHeight: 40,
     fontWeight: "800",
-    marginBottom: 8,
+    maxWidth: 260,
   },
-  subtitle: {
-    color: "rgba(255,255,255,0.82)",
-    fontSize: 15,
-    lineHeight: 22,
-    maxWidth: 320,
+  roleBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: COLORS.badgeBg,
+    borderWidth: 1,
+    borderColor: COLORS.badgeBorder,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
   },
-  roleText: {
-    fontWeight: "800",
-    color: COLORS.white,
+  roleBadgeText: {
+    color: COLORS.badgeText,
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.2,
   },
+
   card: {
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.surface,
     marginHorizontal: 16,
-    borderRadius: 28,
-    padding: 20,
+    borderRadius: 30,
+    paddingHorizontal: 20,
+    paddingTop: 22,
+    paddingBottom: 18,
+  },
+
+  inputGroup: {
+    marginBottom: 16,
   },
   label: {
     color: COLORS.textDark,
     fontSize: 14,
     fontWeight: "700",
     marginBottom: 8,
-    marginTop: 10,
   },
   input: {
-    height: 56,
+    height: 58,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: 18,
     paddingHorizontal: 16,
     color: COLORS.textDark,
     fontSize: 15,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.inputBg,
   },
   passwordWrap: {
-    minHeight: 56,
+    minHeight: 58,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: 18,
     paddingHorizontal: 16,
+    backgroundColor: COLORS.inputBg,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: COLORS.white,
   },
   passwordInput: {
     flex: 1,
     color: COLORS.textDark,
     fontSize: 15,
-    paddingVertical: 14,
+    paddingVertical: 15,
     paddingRight: 12,
   },
   toggleText: {
     color: COLORS.primary,
-    fontWeight: "700",
     fontSize: 14,
+    fontWeight: "800",
   },
   hint: {
     color: COLORS.textMuted,
     fontSize: 12.5,
-    lineHeight: 18,
-    marginTop: 10,
-    marginBottom: 18,
+    marginTop: 8,
+    marginLeft: 2,
   },
+
   primaryButton: {
-    height: 56,
+    height: 58,
     borderRadius: 18,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.primarySoft,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 8,
   },
   primaryButtonDisabled: {
     opacity: 0.6,
   },
   primaryButtonText: {
     color: COLORS.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "800",
   },
+
   footerText: {
     textAlign: "center",
     marginTop: 18,
@@ -273,6 +335,6 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     color: COLORS.primary,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

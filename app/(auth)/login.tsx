@@ -1,17 +1,17 @@
 import { authService } from "@/services/authService";
-import { AuthUser } from "@/types/auth";
-import { saveSession } from "@/utils/storage";
+import { UserRole } from "@/types/auth";
+import { getPendingRole } from "@/utils/authFlowStorage";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     Pressable,
     SafeAreaView,
     ScrollView,
     StyleSheet,
-    Switch,
     Text,
     TextInput,
     View,
@@ -19,79 +19,64 @@ import {
 
 const COLORS = {
   bg: "#0D1A63",
+  shell: "rgba(255,255,255,0.10)",
+  panel: "#F7F8FC",
   card: "#FFFFFF",
   textDark: "#111827",
-  textMuted: "#6B7280",
-  border: "#D9E2F2",
+  textMuted: "#7B8190",
+  line: "#D8DEEA",
   primary: "#163BB8",
-  primarySoft: "#EEF4FF",
+  primarySoft: "#6E84D9",
   white: "#FFFFFF",
+  blackButton: "#0E1016",
 };
 
-function getRouteByRole(user: AuthUser) {
-  switch (user.role) {
-    case "BUSINESS":
-      return "/(business)";
-    case "CUSTOMER":
-    case "NGO":
-    case "COURIER":
-    case "ADMIN":
-    default:
-      return "/(customer)";
-  }
-}
-
-export default function LoginScreen() {
+export default function RegisterScreen() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("CUSTOMER");
   const [loading, setLoading] = useState(false);
 
-  const isValid = useMemo(() => {
-    return /\S+@\S+\.\S+/.test(email.trim()) && password.length >= 8;
-  }, [email, password]);
+  useEffect(() => {
+    getPendingRole().then((role) => {
+      if (role) setSelectedRole(role);
+    });
+  }, []);
 
-  async function handleLogin() {
+  const passwordValid =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /\d/.test(password);
+
+  const isValid = useMemo(() => {
+    return (
+      fullName.trim().length >= 2 &&
+      /\S+@\S+\.\S+/.test(email.trim()) &&
+      passwordValid
+    );
+  }, [fullName, email, password, passwordValid]);
+
+  async function handleRegister() {
     if (!isValid || loading) return;
 
     try {
       setLoading(true);
 
-      const result = await authService.login({
+      const result = await authService.register({
+        fullName: fullName.trim(),
         email: email.trim().toLowerCase(),
         password,
-        rememberMe,
+        role: selectedRole,
       });
 
-      await saveSession({
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-        user: result.user,
-      });
-
-      router.replace(getRouteByRole(result.user) as any);
+      router.push(
+        `/(auth)/verify-email?email=${encodeURIComponent(result.email)}` as any
+      );
     } catch (error: any) {
-      if (error?.requiresVerification && error?.email) {
-        Alert.alert(
-          "Email not verified",
-          "Please verify your email before signing in.",
-          [
-            {
-              text: "Go to verification",
-              onPress: () =>
-                router.push({
-                  pathname: "/(auth)/verify-email",
-                  params: { email: error.email },
-                }),
-            },
-            { text: "OK", style: "cancel" },
-          ]
-        );
-        return;
-      }
-
-      Alert.alert("Login failed", error?.message || "Please try again.");
+      Alert.alert("Register failed", error?.message || "Please try again.");
     } finally {
       setLoading(false);
     }
@@ -103,74 +88,108 @@ export default function LoginScreen() {
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scroll}>
-          <View style={styles.hero}>
-            <Text style={styles.badge}>Replate</Text>
-            <Text style={styles.title}>Welcome back</Text>
-            <Text style={styles.subtitle}>
-              Sign in to continue rescuing good food.
-            </Text>
-          </View>
-
-          <View style={styles.card}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              placeholderTextColor={COLORS.textMuted}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-            />
-
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordWrap}>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                placeholderTextColor={COLORS.textMuted}
-                secureTextEntry={!showPassword}
-                style={styles.passwordInput}
-              />
-              <Pressable onPress={() => setShowPassword((v) => !v)}>
-                <Text style={styles.toggleText}>
-                  {showPassword ? "Hide" : "Show"}
-                </Text>
-              </Pressable>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.outerShell}>
+            <View style={styles.topArea}>
+              <View style={styles.logoWrap}>
+                <Image
+                  source={require("@/assets/images/onboarding/logoFinal.png")}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
 
-            <View style={styles.rowBetween}>
-              <View style={styles.rememberRow}>
-                <Switch value={rememberMe} onValueChange={setRememberMe} />
-                <Text style={styles.rememberText}>Remember me</Text>
+            <View style={styles.bottomPanel}>
+              <View style={styles.tabsRow}>
+                <Pressable
+                  onPress={() => router.replace("/(auth)/login")}
+                  style={styles.tabButton}
+                >
+                  <Text style={styles.tabText}>Login</Text>
+                </Pressable>
+
+                <Pressable style={styles.tabButton}>
+                  <Text style={[styles.tabText, styles.tabTextActive]}>
+                    Sign up
+                  </Text>
+                  <View style={styles.activeLine} />
+                </Pressable>
               </View>
 
-              <Pressable>
-                <Text style={styles.linkText}>Forgot password?</Text>
-              </Pressable>
+              <View style={styles.formCard}>
+                <View style={styles.fieldBlock}>
+                  <Text style={styles.fieldLabel}>Full name</Text>
+                  <TextInput
+                    value={fullName}
+                    onChangeText={setFullName}
+                    placeholder="Enter your full name"
+                    placeholderTextColor={COLORS.textMuted}
+                    style={styles.input}
+                    autoCapitalize="words"
+                  />
+                </View>
+
+                <View style={styles.fieldBlock}>
+                  <Text style={styles.fieldLabel}>Email address</Text>
+                  <TextInput
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Enter your email"
+                    placeholderTextColor={COLORS.textMuted}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    style={styles.input}
+                  />
+                </View>
+
+                <View style={styles.fieldBlock}>
+                  <Text style={styles.fieldLabel}>Password</Text>
+                  <View style={styles.passwordWrap}>
+                    <TextInput
+                      value={password}
+                      onChangeText={setPassword}
+                      placeholder="Create your password"
+                      placeholderTextColor={COLORS.textMuted}
+                      secureTextEntry={!showPassword}
+                      style={styles.passwordInput}
+                    />
+
+                    <Pressable onPress={() => setShowPassword((v) => !v)}>
+                      <Text style={styles.toggleText}>
+                        {showPassword ? "Hide" : "Show"}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                <Text style={styles.metaText}>8+ characters</Text>
+
+                <Pressable
+                  onPress={handleRegister}
+                  disabled={!isValid || loading}
+                  style={[
+                    styles.primaryButton,
+                    (!isValid || loading) && styles.primaryButtonDisabled,
+                  ]}
+                >
+                  <Text style={styles.primaryButtonText}>
+                    {loading ? "Creating..." : "Create account"}
+                  </Text>
+                </Pressable>
+
+                <Pressable onPress={() => router.replace("/(auth)/login")}>
+                  <Text style={styles.footerText}>
+                    Already have an account?{" "}
+                    <Text style={styles.footerLink}>Login</Text>
+                  </Text>
+                </Pressable>
+              </View>
             </View>
-
-            <Pressable
-              onPress={handleLogin}
-              disabled={!isValid || loading}
-              style={[
-                styles.primaryButton,
-                (!isValid || loading) && styles.primaryButtonDisabled,
-              ]}
-            >
-              <Text style={styles.primaryButtonText}>
-                {loading ? "Signing in..." : "Sign In"}
-              </Text>
-            </Pressable>
-
-            <Pressable onPress={() => router.push("/(auth)/register")}>
-              <Text style={styles.footerText}>
-                Don&apos;t have an account?{" "}
-                <Text style={styles.footerLink}>Create one</Text>
-              </Text>
-            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -187,71 +206,114 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scroll: {
-    paddingBottom: 32,
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingVertical: 20,
+    paddingHorizontal: 14,
   },
-  hero: {
-    paddingTop: 40,
-    paddingHorizontal: 24,
-    paddingBottom: 28,
+
+  outerShell: {
+    borderRadius: 34,
+    backgroundColor: COLORS.shell,
+    padding: 8,
   },
-  badge: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: "700",
-    marginBottom: 12,
-    opacity: 0.9,
+
+  topArea: {
+    minHeight: 250,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    paddingTop: 22,
+    paddingBottom: 10,
   },
-  title: {
-    color: COLORS.white,
-    fontSize: 32,
-    fontWeight: "800",
-    marginBottom: 8,
+  logoWrap: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  subtitle: {
-    color: "rgba(255,255,255,0.82)",
-    fontSize: 15,
-    lineHeight: 22,
-    maxWidth: 300,
+  logo: {
+    width: 170,
+    height: 110,
   },
-  card: {
-    backgroundColor: COLORS.card,
-    marginHorizontal: 16,
+
+  bottomPanel: {
+    backgroundColor: COLORS.panel,
     borderRadius: 28,
-    padding: 20,
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 18,
   },
-  label: {
+
+  tabsRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    columnGap: 34,
+    marginBottom: 20,
+  },
+  tabButton: {
+    alignItems: "center",
+    justifyContent: "flex-end",
+    minWidth: 84,
+    paddingBottom: 8,
+  },
+  tabText: {
+    fontSize: 18,
+    color: COLORS.textMuted,
+    fontWeight: "600",
+  },
+  tabTextActive: {
     color: COLORS.textDark,
-    fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "800",
+  },
+  activeLine: {
+    marginTop: 8,
+    width: 60,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: COLORS.primary,
+  },
+
+  formCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 24,
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 18,
+  },
+
+  fieldBlock: {
+    marginBottom: 14,
+  },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.textMuted,
     marginBottom: 8,
-    marginTop: 10,
   },
   input: {
-    height: 56,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 18,
-    paddingHorizontal: 16,
+    height: 54,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.line,
     color: COLORS.textDark,
-    fontSize: 15,
-    backgroundColor: COLORS.white,
+    fontSize: 16,
+    paddingHorizontal: 2,
+    backgroundColor: "transparent",
   },
+
   passwordWrap: {
-    minHeight: 56,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 18,
-    paddingHorizontal: 16,
+    minHeight: 54,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.line,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: COLORS.white,
   },
   passwordInput: {
     flex: 1,
     color: COLORS.textDark,
-    fontSize: 15,
-    paddingVertical: 14,
+    fontSize: 16,
+    paddingVertical: 10,
     paddingRight: 12,
   },
   toggleText: {
@@ -259,52 +321,39 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 14,
   },
-  rowBetween: {
-    marginTop: 16,
+
+  metaText: {
+    color: COLORS.textMuted,
+    fontSize: 12.5,
+    marginTop: 2,
     marginBottom: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
   },
-  rememberRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-  },
-  rememberText: {
-    color: COLORS.textDark,
-    fontSize: 14,
-  },
-  linkText: {
-    color: COLORS.primary,
-    fontWeight: "700",
-    fontSize: 14,
-  },
+
   primaryButton: {
     height: 56,
     borderRadius: 18,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.blackButton,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 4,
   },
   primaryButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.55,
   },
   primaryButtonText: {
     color: COLORS.white,
     fontSize: 16,
     fontWeight: "800",
   },
+
   footerText: {
-    textAlign: "center",
     marginTop: 18,
+    textAlign: "center",
     color: COLORS.textMuted,
     fontSize: 14,
   },
   footerLink: {
     color: COLORS.primary,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });
