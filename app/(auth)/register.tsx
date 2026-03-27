@@ -1,3 +1,4 @@
+import AuthShell from "@/components/auth/AuthShell";
 import { authService } from "@/services/authService";
 import { UserRole } from "@/types/auth";
 import { getPendingRole } from "@/utils/authFlowStorage";
@@ -5,11 +6,7 @@ import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
     Alert,
-    KeyboardAvoidingView,
-    Platform,
     Pressable,
-    SafeAreaView,
-    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -17,18 +14,12 @@ import {
 } from "react-native";
 
 const COLORS = {
-  bg: "#0D1A63",
-  surface: "#F8F8FB",
-  inputBg: "#FFFFFF",
   textDark: "#111827",
-  textMuted: "#6B7280",
-  border: "#D9E2F2",
+  textMuted: "#7B8190",
+  line: "#D8DEEA",
   primary: "#163BB8",
-  primarySoft: "#6F83D6",
+  blackButton: "#0E1016",
   white: "#FFFFFF",
-  badgeBg: "rgba(255,255,255,0.10)",
-  badgeBorder: "rgba(255,255,255,0.18)",
-  badgeText: "#F5F7FF",
 };
 
 export default function RegisterScreen() {
@@ -59,23 +50,6 @@ export default function RegisterScreen() {
     );
   }, [fullName, email, password, passwordValid]);
 
-  function formatRole(role: UserRole) {
-    switch (role) {
-      case "CUSTOMER":
-        return "Customer";
-      case "BUSINESS":
-        return "Business";
-      case "NGO":
-        return "NGO";
-      case "COURIER":
-        return "Courier";
-      case "ADMIN":
-        return "Admin";
-      default:
-        return role;
-    }
-  }
-
   async function handleRegister() {
     if (!isValid || loading) return;
 
@@ -100,193 +74,93 @@ export default function RegisterScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <AuthShell activeTab="signup">
+      <View style={styles.fieldBlock}>
+        <Text style={styles.fieldLabel}>Full name</Text>
+        <TextInput
+          value={fullName}
+          onChangeText={setFullName}
+          placeholder="Enter your full name"
+          placeholderTextColor={COLORS.textMuted}
+          style={styles.input}
+          autoCapitalize="words"
+        />
+      </View>
+
+      <View style={styles.fieldBlock}>
+        <Text style={styles.fieldLabel}>Email address</Text>
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Enter your email"
+          placeholderTextColor={COLORS.textMuted}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          style={styles.input}
+        />
+      </View>
+
+      <View style={styles.fieldBlock}>
+        <Text style={styles.fieldLabel}>Password</Text>
+        <View style={styles.passwordWrap}>
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Create your password"
+            placeholderTextColor={COLORS.textMuted}
+            secureTextEntry={!showPassword}
+            style={styles.passwordInput}
+          />
+
+          <Pressable onPress={() => setShowPassword((v) => !v)}>
+            <Text style={styles.toggleText}>
+              {showPassword ? "Hide" : "Show"}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <Text style={styles.metaText}>8+ characters</Text>
+
+      <Pressable
+        onPress={handleRegister}
+        disabled={!isValid || loading}
+        style={[
+          styles.primaryButton,
+          (!isValid || loading) && styles.primaryButtonDisabled,
+        ]}
       >
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.hero}>
-            <Text style={styles.brand}>Replate</Text>
-
-            <View style={styles.headingBlock}>
-              <Text style={styles.title}>Create account</Text>
-
-              <View style={styles.roleBadge}>
-                <Text style={styles.roleBadgeText}>{formatRole(selectedRole)}</Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.card}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Full name</Text>
-              <TextInput
-                value={fullName}
-                onChangeText={setFullName}
-                placeholder="Enter your full name"
-                placeholderTextColor={COLORS.textMuted}
-                style={styles.input}
-                autoCapitalize="words"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Enter your email"
-                placeholderTextColor={COLORS.textMuted}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={styles.input}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-
-              <View style={styles.passwordWrap}>
-                <TextInput
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="Create your password"
-                  placeholderTextColor={COLORS.textMuted}
-                  secureTextEntry={!showPassword}
-                  style={styles.passwordInput}
-                />
-
-                <Pressable
-                  onPress={() => setShowPassword((v) => !v)}
-                  hitSlop={10}
-                >
-                  <Text style={styles.toggleText}>
-                    {showPassword ? "Hide" : "Show"}
-                  </Text>
-                </Pressable>
-              </View>
-
-              <Text style={styles.hint}>8+ chars, upper, lower, number</Text>
-            </View>
-
-            <Pressable
-              onPress={handleRegister}
-              disabled={!isValid || loading}
-              style={[
-                styles.primaryButton,
-                (!isValid || loading) && styles.primaryButtonDisabled,
-              ]}
-            >
-              <Text style={styles.primaryButtonText}>
-                {loading ? "Creating account..." : "Create account"}
-              </Text>
-            </Pressable>
-
-            <Pressable onPress={() => router.push("/(auth)/login")}>
-              <Text style={styles.footerText}>
-                Already have an account?{" "}
-                <Text style={styles.footerLink}>Sign in</Text>
-              </Text>
-            </Pressable>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <Text style={styles.primaryButtonText}>
+          {loading ? "Creating..." : "Create account"}
+        </Text>
+      </Pressable>
+    </AuthShell>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
+  fieldBlock: {
+    marginBottom: 14,
   },
-  flex: {
-    flex: 1,
-  },
-  scroll: {
-    flexGrow: 1,
-    paddingBottom: 28,
-  },
-
-  hero: {
-    paddingTop: 26,
-    paddingHorizontal: 24,
-    paddingBottom: 22,
-  },
-  brand: {
-    color: COLORS.white,
-    fontSize: 15,
-    fontWeight: "800",
-    letterSpacing: 0.2,
-    opacity: 0.96,
-    marginBottom: 18,
-  },
-  headingBlock: {
-    gap: 12,
-  },
-  title: {
-    color: COLORS.white,
-    fontSize: 34,
-    lineHeight: 40,
-    fontWeight: "800",
-    maxWidth: 260,
-  },
-  roleBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: COLORS.badgeBg,
-    borderWidth: 1,
-    borderColor: COLORS.badgeBorder,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-  },
-  roleBadgeText: {
-    color: COLORS.badgeText,
+  fieldLabel: {
     fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-
-  card: {
-    backgroundColor: COLORS.surface,
-    marginHorizontal: 16,
-    borderRadius: 30,
-    paddingHorizontal: 20,
-    paddingTop: 22,
-    paddingBottom: 18,
-  },
-
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    color: COLORS.textDark,
-    fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "600",
+    color: COLORS.textMuted,
     marginBottom: 8,
   },
   input: {
-    height: 58,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 18,
-    paddingHorizontal: 16,
+    height: 54,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.line,
     color: COLORS.textDark,
-    fontSize: 15,
-    backgroundColor: COLORS.inputBg,
+    fontSize: 16,
+    paddingHorizontal: 2,
+    backgroundColor: "transparent",
   },
   passwordWrap: {
-    minHeight: 58,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    backgroundColor: COLORS.inputBg,
+    minHeight: 54,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.line,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -294,47 +168,35 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     color: COLORS.textDark,
-    fontSize: 15,
-    paddingVertical: 15,
+    fontSize: 16,
+    paddingVertical: 10,
     paddingRight: 12,
   },
   toggleText: {
     color: COLORS.primary,
+    fontWeight: "700",
     fontSize: 14,
-    fontWeight: "800",
   },
-  hint: {
+  metaText: {
     color: COLORS.textMuted,
     fontSize: 12.5,
-    marginTop: 8,
-    marginLeft: 2,
+    marginTop: 2,
+    marginBottom: 18,
   },
-
   primaryButton: {
-    height: 58,
+    height: 56,
     borderRadius: 18,
-    backgroundColor: COLORS.primarySoft,
+    backgroundColor: COLORS.blackButton,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
+    marginTop: 4,
   },
   primaryButtonDisabled: {
-    opacity: 0.6,
+    opacity: 0.55,
   },
   primaryButtonText: {
     color: COLORS.white,
-    fontSize: 17,
-    fontWeight: "800",
-  },
-
-  footerText: {
-    textAlign: "center",
-    marginTop: 18,
-    color: COLORS.textMuted,
-    fontSize: 14,
-  },
-  footerLink: {
-    color: COLORS.primary,
+    fontSize: 16,
     fontWeight: "800",
   },
 });
