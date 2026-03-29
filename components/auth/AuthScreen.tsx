@@ -18,14 +18,14 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 
 const COLORS = {
   bg: "#0D1A63",
-  panel: "#F7F8FC",
+  panel: "#F4F5F9",
   card: "#FFFFFF",
   textDark: "#111827",
-  textMuted: "#7B8190",
-  line: "#D8DEEA",
+  textMuted: "#6F7687",
+  line: "#D4DAE6",
   primary: "#163BB8",
   primarySoft: "#0D1A63",
-  buttonDisabled: "#C9CED8",
+  buttonDisabled: "#C5CBD8",
   white: "#FFFFFF",
   danger: "#D14343",
   warning: "#E59B1F",
@@ -132,6 +132,7 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
   }, [loginEmail, loginPassword]);
 
   async function handleRegister() {
+    console.log("REGISTER BUTTON PRESSED");
     if (!isRegisterValid || registerLoading) return;
 
     try {
@@ -231,7 +232,7 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
                 </Pressable>
               </View>
 
-              <View style={styles.formCard}>
+              <View style={styles.formContent}>
                 {activeTab === "login" ? (
                   <>
                     <View style={styles.fieldBlock}>
@@ -240,7 +241,7 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
                         value={loginEmail}
                         onChangeText={setLoginEmail}
                         placeholder="Enter your email"
-                        placeholderTextColor={COLORS.textMuted}
+                        placeholderTextColor="#8B92A3"
                         autoCapitalize="none"
                         keyboardType="email-address"
                         style={styles.input}
@@ -269,6 +270,7 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
                       </View>
                     </View>
 
+                    <View style={styles.forgotWrap}>
                     <Pressable
                       onPress={() =>
                         router.push("/(auth)/forgot-password" as any)
@@ -276,6 +278,7 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
                     >
                       <Text style={styles.forgotText}>Forgot password?</Text>
                     </Pressable>
+                    </View>
 
                     <Pressable
                       onPress={handleLogin}
@@ -428,7 +431,7 @@ const styles = StyleSheet.create({
   },
 
   topArea: {
-    height:250,
+    height:220,
     backgroundColor:COLORS.bg,
     alignItems: "center",
     justifyContent: "flex-end",
@@ -442,8 +445,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: 240,
-    height: 145,
+    width: 250,
+    height: 150,
   },
 
   bottomPanel: {
@@ -451,7 +454,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.panel,
     borderTopLeftRadius:32,
     borderTopRightRadius:32,
-    paddingHorizontal:20,
+    paddingHorizontal:24,
     paddingTop:18,
     marginTop:-6,
     // minHeight:680,
@@ -462,64 +465,67 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "center",
-    columnGap: 34,
-    marginBottom: 22,
+    columnGap: 20,
+    marginBottom: 18,
   },
   tabButton: {
+    width:140,
     alignItems: "center",
     justifyContent: "flex-end",
-    minWidth: 84,
     paddingBottom: 8,
   },
   tabText: {
-    fontSize: 18,
+    fontSize: 17,
     color: COLORS.textMuted,
     fontWeight: "600",
   },
   tabTextActive: {
+    fontSize:19,
     color: COLORS.textDark,
     fontWeight: "800",
   },
   activeLine: {
     marginTop: 8,
-    width: 60,
-    height: 3,
+    width: 72,
+    height: 4,
     borderRadius: 999,
     backgroundColor: COLORS.primary,
   },
 
-  formCard: {
-    backgroundColor: COLORS.card,
-    borderRadius: 24,
-    paddingHorizontal: 18,
-    paddingTop: 18,
-    paddingBottom: 28,
-    marginTop:32,
+  formContent: {
+    flex:1,
+    // marginTop:32,
+    paddingHorizontal:6,
+    paddingTop:56,
+    justifyContent:"space-between",
   },
 
   fieldBlock: {
-    marginBottom: 18,
+    marginBottom: 22,
   },
   fieldLabel: {
     fontSize: 13,
-    fontWeight: "600",
-    color: COLORS.textMuted,
-    marginBottom: 8,
+    fontWeight: "700",
+    color: "#6B7280",
+    marginBottom: 6,
+    letterSpacing:0.2,
   },
   input: {
-    height: 54,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.line,
+    height: 52,
+    borderBottomWidth: 1.2,
+    borderBottomColor: "#D4DAE6",
     color: COLORS.textDark,
     fontSize: 16,
-    paddingHorizontal: 2,
+    paddingHorizontal: 4,
+    paddingTop:0,
+    paddingBottom:6,
     backgroundColor: "transparent",
   },
 
   passwordWrap: {
-    minHeight: 54,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.line,
+    minHeight: 52,
+    borderBottomWidth: 1.2,
+    borderBottomColor: "#D4DAE6",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -527,7 +533,7 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     color: COLORS.textDark,
-    fontSize: 16,
+    fontSize: 15.5,
     paddingVertical: 10,
     paddingRight: 12,
   },
@@ -557,19 +563,25 @@ const styles = StyleSheet.create({
   },
 
   forgotText: {
-    color: COLORS.textDark,
-    fontSize: 14,
-    fontWeight: "500",
-    marginTop: 4,
-    marginBottom: 22,
+    color:"#20263A",
+    fontSize: 13.5,
+    fontWeight: "600",
+    // marginTop: 4,
+    // marginBottom: 22,
+  },
+  forgotWrap:{
+    marginTop:10,
+    marginBottom:24,
+    alignItems:"flex-end",
   },
 
   primaryButton: {
-    height: 56,
-    borderRadius: 18,
+    height: 58,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 4,
+    marginTop: "auto",
+    marginBottom: 8,
   },
   primaryButtonEnabled: {
     backgroundColor: COLORS.primarySoft,
