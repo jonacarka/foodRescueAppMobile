@@ -9,17 +9,15 @@ import {
     KeyboardAvoidingView,
     Platform,
     Pressable,
-    SafeAreaView,
-    ScrollView,
     StyleSheet,
     Text,
     TextInput,
     View,
 } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 const COLORS = {
   bg: "#0D1A63",
-  shell: "rgba(255,255,255,0.10)",
   panel: "#F7F8FC",
   card: "#FFFFFF",
   textDark: "#111827",
@@ -39,6 +37,8 @@ type Props = {
 };
 
 export default function AuthScreen({ initialTab = "login" }: Props) {
+    const insets = useSafeAreaInsets();
+
   const [activeTab, setActiveTab] = useState<"login" | "signup">(initialTab);
 
   const [fullName, setFullName] = useState("");
@@ -173,18 +173,16 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
     }
   }
 
+
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.root}>
+    <SafeAreaView style={styles.topSafe} edges={["top"]}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.outerShell}>
+        <View style={styles.screenContent}>
+
             <View style={styles.topArea}>
               <View style={styles.logoWrap}>
                 <Image
@@ -195,12 +193,17 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
               </View>
             </View>
 
-            <View style={styles.bottomPanel}>
-              <View style={styles.tabsRow}>
-                <Pressable
-                  onPress={() => setActiveTab("login")}
-                  style={styles.tabButton}
+            <View 
+            style={[
+                styles.bottomPanel,
+                {paddingBottom:24 + insets.bottom},
+            ]}
                 >
+                    <View style={styles.tabsRow}>
+                        <Pressable
+                        onPress={() => setActiveTab("login")}
+                        style={styles.tabButton}
+                        >
                   <Text
                     style={[
                       styles.tabText,
@@ -399,42 +402,39 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
                   </>
                 )}
               </View>
-            </View>
           </View>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
+    root:{
+        flex:1,
+        backgroundColor:COLORS.panel,
+    },
+  topSafe: {
     flex: 1,
     backgroundColor: COLORS.bg,
   },
   flex: {
     flex: 1,
   },
-  scroll: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingVertical: 20,
-    paddingHorizontal: 14,
-  },
-
-  outerShell: {
-    borderRadius: 34,
-    backgroundColor: COLORS.shell,
-    padding: 8,
+  screenContent:{
+    flex:1,
+    backgroundColor:COLORS.bg,
   },
 
   topArea: {
-    minHeight: 250,
+    height:250,
+    backgroundColor:COLORS.bg,
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingTop: 22,
-    paddingBottom: 10,
+    justifyContent: "flex-end",
+    paddingHorizontal: 22,
+    paddingBottom: 24,
+   
   },
   logoWrap: {
     width: "100%",
@@ -442,16 +442,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    width: 220,
-    height: 140,
+    width: 240,
+    height: 145,
   },
 
   bottomPanel: {
+    flex:1,
     backgroundColor: COLORS.panel,
-    borderRadius: 28,
-    paddingHorizontal: 18,
-    paddingTop: 14,
-    paddingBottom: 18,
+    borderTopLeftRadius:32,
+    borderTopRightRadius:32,
+    paddingHorizontal:20,
+    paddingTop:18,
+    marginTop:-6,
+    // minHeight:680,
+    
   },
 
   tabsRow: {
@@ -459,7 +463,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "center",
     columnGap: 34,
-    marginBottom: 20,
+    marginBottom: 22,
   },
   tabButton: {
     alignItems: "center",
@@ -488,12 +492,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     borderRadius: 24,
     paddingHorizontal: 18,
-    paddingTop: 14,
-    paddingBottom: 18,
+    paddingTop: 18,
+    paddingBottom: 28,
+    marginTop:32,
   },
 
   fieldBlock: {
-    marginBottom: 14,
+    marginBottom: 18,
   },
   fieldLabel: {
     fontSize: 13,
