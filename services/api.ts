@@ -1,6 +1,6 @@
 import { ApiErrorResponse } from "@/types/auth";
 
-export const API_BASE_URL = "http://172.20.10.13:5000/api";
+export const API_BASE_URL = "https://unreleasing-thatcher-nonmethodic.ngrok-free.dev/api";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -33,6 +33,7 @@ export async function apiRequest<T>(
     throw {
       status: 0,
       message: "Network request failed",
+      originalError:error,
     };
   }
 
