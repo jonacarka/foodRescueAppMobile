@@ -37,6 +37,20 @@ type Props = {
   initialTab?: "login" | "signup";
 };
 
+ function getRouteByRole(user:AuthUser){
+    switch(user.role){
+        case "BUSINESS":
+            return "/(business)";
+            case "CUSTOMER":
+                case "NGO":
+                    case "COURIER":
+                        case "ADMIN":
+                            default:
+                                return "/(customer)";
+    }
+  }
+
+
 export default function AuthScreen({ initialTab = "login" }: Props) {
     const insets = useSafeAreaInsets();
 
@@ -186,19 +200,6 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
       Alert.alert("Login failed",err?.error || err?.message || "Please try again");
     } finally {
       setLoginLoading(false);
-    }
-  }
-
-  function getRouteByRole(user:AuthUser){
-    switch(user.role){
-        case "BUSINESS":
-            return "/(business)";
-            case "CUSTOMER":
-                case "NGO":
-                    case "COURIER":
-                        case "ADMIN":
-                            default:
-                                return "/(customer)";
     }
   }
 
