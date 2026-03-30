@@ -2,18 +2,19 @@ import { authService } from "@/services/authService";
 import { AuthUser } from "@/types/auth";
 import { saveSession } from "@/utils/storage";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
+
 
 const COLORS = {
     bg: "#0D1A63",
@@ -46,6 +47,17 @@ export default function VerifyEmailScreen(){
     const[code,setCode] = useState("");
     const[loading,setLoading] = useState(false);
     const[resending,setResending] = useState(false);
+    const[cooldown,setCooldown] = useState(0);
+
+    useEffect(() => {
+      if(cooldown <= 0) return;
+
+      const timer = setTimeout(() =>{
+        setCooldown((prev) => prev -1);
+      },1000);
+
+      return() => clearTimeout(timer);
+    },[cooldown]);
 
     const isValid = useMemo(() => {
     return /\S+@\S+\.\S+/.test(email.trim()) && /^\d{5}$/.test(code.trim());
@@ -77,11 +89,12 @@ export default function VerifyEmailScreen(){
     }
 
      async function handleResend() {
-    if (!/\S+@\S+\.\S+/.test(email.trim()) || resending) return;
+    if (!/\S+@\S+\.\S+/.test(email.trim()) || resending || cooldown > 0) return;
 
     try {
       setResending(true);
       const result = await authService.resendCode(email.trim().toLowerCase());
+      setCooldown(60);
       Alert.alert("Code sent", result.message);
     } catch (error: any) {
       Alert.alert("Resend failed", error?.message || "Please try again.");
@@ -109,12 +122,13 @@ export default function VerifyEmailScreen(){
             <Text style={styles.label}>Email</Text>
             <TextInput
               value={email}
-              onChangeText={setEmail}
+              editable={false}
+              selectTextOnFocus={false}
               placeholder="Enter your email"
               placeholderTextColor={COLORS.textMuted}
               autoCapitalize="none"
               keyboardType="email-address"
-              style={styles.input}
+              style={[styles.input,styles.inputDisabled]}
             />
 
             <Text style={styles.label}>Verification code</Text>
@@ -141,11 +155,11 @@ export default function VerifyEmailScreen(){
               </Text>
             </Pressable>
 
-            <Pressable onPress={handleResend} disabled={resending}>
+            <Pressable onPress={handleResend} disabled={resending || cooldown > 0}>
               <Text style={styles.footerText}>
                 Didn&apos;t get the code?{" "}
                 <Text style={styles.footerLink}>
-                  {resending ? "Sending..." : "Resend"}
+                  {resending ? "Sending..." : cooldown > 0 ? `Resend in ${cooldown}s` :"Resend"}
                 </Text>
               </Text>
             </Pressable>
@@ -258,5 +272,9 @@ const styles = StyleSheet.create({
   footerLink: {
     color: COLORS.primary,
     fontWeight: "700",
+  },
+  inputDisabled:{
+    backgroundColor: "#F3F5F8",
+    color:"#7B8496",
   },
 });

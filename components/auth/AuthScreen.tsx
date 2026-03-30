@@ -1,6 +1,7 @@
 import { authService } from "@/services/authService";
-import { UserRole } from "@/types/auth";
+import { ApiErrorResponse, AuthUser, UserRole } from "@/types/auth";
 import { getPendingRole } from "@/utils/authFlowStorage";
+import { saveSession } from "@/utils/storage";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -161,16 +162,43 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
     try {
       setLoginLoading(true);
 
-      await authService.login({
+      const result =await authService.login({
         email: loginEmail.trim().toLowerCase(),
         password: loginPassword,
       });
 
-      router.replace("/(customer)" as any);
+      await saveSession({
+        accessToken:result.accessToken,
+        refreshToken:result.refreshToken,
+        user:result.user,
+      });
+
+      router.replace(getRouteByRole(result.user) as any);
     } catch (error: any) {
-      Alert.alert("Login failed", error?.message || "Please try again.");
+      const err = error as ApiErrorResponse;
+
+      if(err?.requiresVerification && err?.email){
+        router.push(
+            `/(auth)/verify-email?email=${encodeURIComponent(err.email)}`as any
+        );
+        return;
+      }
+      Alert.alert("Login failed",err?.error || err?.message || "Please try again");
     } finally {
       setLoginLoading(false);
+    }
+  }
+
+  function getRouteByRole(user:AuthUser){
+    switch(user.role){
+        case "BUSINESS":
+            return "/(business)";
+            case "CUSTOMER":
+                case "NGO":
+                    case "COURIER":
+                        case "ADMIN":
+                            default:
+                                return "/(customer)";
     }
   }
 
