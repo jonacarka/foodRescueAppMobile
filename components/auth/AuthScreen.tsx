@@ -16,6 +16,8 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import VerifyEmailCard from "./VerifyEmailCard";
+
 
 const COLORS = {
   bg: "#0D1A63",
@@ -54,7 +56,8 @@ type Props = {
 export default function AuthScreen({ initialTab = "login" }: Props) {
     const insets = useSafeAreaInsets();
 
-  const [activeTab, setActiveTab] = useState<"login" | "signup">(initialTab);
+  const [activeTab, setActiveTab] = useState<"login" | "signup" | "verify">(initialTab);
+  const[verificationEmail,setVerificationEmail]=useState("");
 
   const [fullName, setFullName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
@@ -160,9 +163,12 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
         role: selectedRole,
       });
 
-      router.push(
-        `/(auth)/verify-email?email=${encodeURIComponent(result.email)}` as any
-      );
+    //   router.push(
+    //     `/(auth)/verify-email?email=${encodeURIComponent(result.email)}` as any
+    //   );
+
+    setVerificationEmail(result.email);
+    setActiveTab("verify");
     } catch (error: any) {
       Alert.alert("Register failed", error?.message || "Please try again.");
     } finally {
@@ -192,9 +198,11 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
       const err = error as ApiErrorResponse;
 
       if(err?.requiresVerification && err?.email){
-        router.push(
-            `/(auth)/verify-email?email=${encodeURIComponent(err.email)}`as any
-        );
+        // router.push(
+        //     `/(auth)/verify-email?email=${encodeURIComponent(err.email)}`as any
+        // );
+        setVerificationEmail(err.email);
+        setActiveTab("verify");
         return;
       }
       Alert.alert("Login failed",err?.error || err?.message || "Please try again");
@@ -229,6 +237,7 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
                 {paddingBottom:24 + insets.bottom},
             ]}
                 >
+                    {activeTab !== "verify" && (
                     <View style={styles.tabsRow}>
                         <Pressable
                         onPress={() => setActiveTab("login")}
@@ -260,9 +269,18 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
                   {activeTab === "signup" && <View style={styles.activeLine} />}
                 </Pressable>
               </View>
+                    )}
 
               <View style={styles.formContent}>
-                {activeTab === "login" ? (
+                {activeTab === "verify" ? (
+                    <VerifyEmailCard
+                    email={verificationEmail}
+                    onBackToLogin={()=>{
+                        setActiveTab("login");
+                        setVerificationEmail("");
+                    }}
+                    />
+                ): activeTab === "login" ? (
                   <>
                     <View style={styles.fieldBlock}>
                       <Text style={styles.fieldLabel}>Email address</Text>
