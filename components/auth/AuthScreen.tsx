@@ -217,7 +217,8 @@ export default function AuthScreen({ initialTab = "login" }: Props) {
     <SafeAreaView style={styles.topSafe} edges={["top"]}>
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        enabled={activeTab !== "verify"}
+        behavior={Platform.OS === "ios" && activeTab !== "verify" ? "padding" : undefined}
       >
         <View style={styles.screenContent}>
 

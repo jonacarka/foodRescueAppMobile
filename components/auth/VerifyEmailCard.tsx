@@ -17,7 +17,7 @@ const COLORS={
     textDark:"#111827",
     textMuted:"#6B7280",
     border:"#D9E2F2",
-    primary:"#163BB8",
+    primary:"#0D1A63",
     white:"#FFFFFF",
     buttonDisabled:"#C5CBD8",
 };
@@ -66,7 +66,7 @@ export default function VerifyEmailCard({
     },[email,code]);
 
     function handleCodeChange(text:string){
-        const clean = text.replace(/[^\d]/g,"").slice(0,5);
+        const clean = text.replace(/[^\d]/g,"").slice(0, 5);
         setCode(clean);
 
         if(clean.length === 5){
@@ -165,6 +165,10 @@ return (
         maxLength={5}
         returnKeyType="done"
         blurOnSubmit
+        onSubmitEditing={() => {
+            hiddenInputRef.current?.blur();
+            Keyboard.dismiss();
+        }}
         style={styles.hiddenInput}
         />
       </View>
@@ -207,7 +211,8 @@ return (
 const styles = StyleSheet.create({
   verifyWrap: {
     flex: 1,
-    justifyContent: "center",
+    paddingTop:18,
+    // justifyContent: "center",
   },
   title: {
     color:"#0D1A63",
