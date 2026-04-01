@@ -211,14 +211,14 @@ return (
 const styles = StyleSheet.create({
   verifyWrap: {
     flex: 1,
-    paddingTop:18,
+    paddingTop:8,
     // justifyContent: "center",
   },
   title: {
     color:"#0D1A63",
     fontSize: 30,
     fontWeight: "800",
-    marginBottom: 8,
+    marginBottom:7,
     textAlign:"left",
   },
   subtitle: {

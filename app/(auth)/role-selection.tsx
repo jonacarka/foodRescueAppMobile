@@ -3,13 +3,13 @@ import { setPendingRole } from "@/utils/authFlowStorage";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    Image,
-    Pressable,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Image,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 const COLORS = {
