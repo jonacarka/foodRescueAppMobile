@@ -1,225 +1,230 @@
-import { PublicAppRole } from "@/types/auth-flow";
-import { setPendingRole } from "@/utils/authFlowStorage";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Image,
   Pressable,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
+type RoleKey = "CUSTOMER" | "BUSINESS" | "NGO" | "COURIER";
+
 const COLORS = {
-  bg: "#F8F6F1",
-  text: "#111827",
-  muted: "#6B7280",
-  primary: "#0D1A63",
-  primarySoft: "#E9EEFF",
+  bg: "#F7F5F0",
+  card: "#FFFFFF",
+  cardSelected: "#EEF2FF",
+  border: "#D9DEE8",
+  borderSelected: "#172554",
+  text: "#0F172A",
+  muted: "#667085",
+  primary: "#172C8C",
   white: "#FFFFFF",
-  border: "#D9E2F2",
 };
 
-const clientImage = require("@/assets/images/onboarding/auth/customer.png");
-const businessImage = require("@/assets/images/onboarding/auth/business.png");
-
-type MainRoleCardProps = {
+const ROLES: {
+  key: RoleKey;
   title: string;
   subtitle: string;
   image: any;
-  active: boolean;
-  onPress: () => void;
-};
-
-function MainRoleCard({
-  title,
-  subtitle,
-  image,
-  active,
-  onPress,
-}: MainRoleCardProps) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.card, active && styles.cardActive]}
-    >
-      <View style={styles.cardTextArea}>
-        <Text style={[styles.cardTitle, active && styles.cardTitleActive]}>
-          {title}
-        </Text>
-        <Text
-          style={[styles.cardSubtitle, active && styles.cardSubtitleActive]}
-        >
-          {subtitle}
-        </Text>
-      </View>
-
-      <Image source={image} style={styles.cardImage} resizeMode="contain" />
-    </Pressable>
-  );
-}
+}[] = [
+  {
+    key: "CUSTOMER",
+    title: "Client",
+    subtitle: "Save good food nearby",
+    image: require("@/assets/images/onboarding/auth/customer.png"),
+  },
+  {
+    key: "BUSINESS",
+    title: "Business",
+    subtitle: "Share surplus food easily",
+    image: require("@/assets/images/onboarding/auth/business.png"),
+  },
+  {
+    key: "NGO",
+    title: "NGO",
+    subtitle: "Support food redistribution",
+    image: require("@/assets/images/onboarding/auth/ngo.png"),
+  },
+  {
+    key: "COURIER",
+    title: "Courier",
+    subtitle: "Help deliver rescued food",
+    image: require("@/assets/images/onboarding/auth/courier.png"),
+  },
+];
 
 export default function RoleSelectionScreen() {
-  const [selectedRole, setSelectedRole] = useState<PublicAppRole>("CUSTOMER");
+  const [selectedRole, setSelectedRole] = useState<RoleKey>("CUSTOMER");
 
-  async function handleGetStarted() {
-    await setPendingRole(selectedRole);
+  const selectedItem = useMemo(
+    () => ROLES.find((item) => item.key === selectedRole),
+    [selectedRole]
+  );
+
+  const handleContinue = () => {
+    // Ketu fut logjiken tende ekzistuese
+    // psh ruajtja e role ne storage dhe pastaj navigimi
     router.push("/(auth)/register");
-  }
-
-  async function handleMoreRoles() {
-    await setPendingRole(selectedRole);
-    router.push("/(auth)/more-roles");
-  }
+  };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.hero}>
-          <Text style={styles.title}>Choose how you’ll use Replate</Text>
-          <Text style={styles.subtitle}>
-            Pick the experience that fits you best. You can continue in seconds.
-          </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Choose your role</Text>
+          <Text style={styles.subtitle}>Pick one to continue</Text>
         </View>
 
-        <MainRoleCard
-          title="Client"
-          subtitle="Discover and save surplus food nearby."
-          image={clientImage}
-          active={selectedRole === "CUSTOMER"}
-          onPress={() => setSelectedRole("CUSTOMER")}
-        />
+        <View style={styles.cardsWrap}>
+          {ROLES.map((item) => {
+            const isSelected = item.key === selectedRole;
 
-        <MainRoleCard
-          title="Business"
-          subtitle="Offer surplus food in a simple, smart way."
-          image={businessImage}
-          active={selectedRole === "BUSINESS"}
-          onPress={() => setSelectedRole("BUSINESS")}
-        />
+            return (
+              <Pressable
+                key={item.key}
+                onPress={() => setSelectedRole(item.key)}
+                style={[
+                  styles.card,
+                  isSelected && styles.cardSelected,
+                ]}
+              >
+                <View style={styles.cardText}>
+                  <Text
+                    style={[
+                      styles.cardTitle,
+                      isSelected && styles.cardTitleSelected,
+                    ]}
+                  >
+                    {item.title}
+                  </Text>
 
-        <Pressable onPress={handleMoreRoles} style={styles.moreRolesButton}>
-          <Text style={styles.moreRolesText}>More roles</Text>
-        </Pressable>
+                  <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
+                </View>
 
-        <Pressable onPress={handleGetStarted} style={styles.primaryButton}>
-          <Text style={styles.primaryButtonText}>Get started</Text>
+                <Image
+                  source={item.image}
+                  style={styles.cardImage}
+                  resizeMode="contain"
+                />
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Pressable style={styles.primaryButton} onPress={handleContinue}>
+          <Text style={styles.primaryButtonText}>Continue</Text>
         </Pressable>
 
         <Pressable onPress={() => router.push("/(auth)/login")}>
-          <Text style={styles.footerText}>
-            Already have an account? <Text style={styles.footerLink}>Sign in</Text>
+          <Text style={styles.signInText}>
+            Already have an account? <Text style={styles.signInLink}>Sign in</Text>
           </Text>
         </Pressable>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.bg,
   },
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 36,
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 18,
+    paddingBottom: 24,
+    justifyContent: "space-between",
   },
-  hero: {
-    marginBottom: 22,
+  header: {
+    marginTop: 8,
+    marginBottom: 18,
   },
   title: {
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 34,
+    lineHeight: 40,
     fontWeight: "800",
     color: COLORS.text,
-    maxWidth: 300,
+    letterSpacing: -0.8,
   },
   subtitle: {
     marginTop: 10,
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 17,
+    lineHeight: 25,
     color: COLORS.muted,
-    maxWidth: 320,
+    fontWeight: "500",
+  },
+  cardsWrap: {
+    gap: 14,
+    marginBottom: 22,
   },
   card: {
-    minHeight: 180,
+    minHeight: 128,
     borderRadius: 28,
+    backgroundColor: COLORS.card,
     borderWidth: 1.5,
     borderColor: COLORS.border,
-    backgroundColor: COLORS.white,
-    padding: 18,
-    marginBottom: 16,
-    overflow: "hidden",
+    paddingLeft: 20,
+    paddingRight: 14,
+    paddingVertical: 18,
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
   },
-  cardActive: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primarySoft,
+  cardSelected: {
+    backgroundColor: COLORS.cardSelected,
+    borderColor: COLORS.borderSelected,
   },
-  cardTextArea: {
-    zIndex: 2,
-    maxWidth: "58%",
+  cardText: {
+    flex: 1,
+    paddingRight: 12,
   },
   cardTitle: {
     fontSize: 22,
+    lineHeight: 28,
     fontWeight: "800",
     color: COLORS.text,
+    marginBottom: 8,
   },
-  cardTitleActive: {
+  cardTitleSelected: {
     color: COLORS.primary,
   },
   cardSubtitle: {
-    marginTop: 8,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 23,
     color: COLORS.muted,
-  },
-  cardSubtitleActive: {
-    color: COLORS.primary,
+    fontWeight: "500",
+    maxWidth: 170,
   },
   cardImage: {
-    position: "absolute",
-    right: 8,
-    bottom: 0,
-    width: 150,
-    height: 150,
-  },
-  moreRolesButton: {
-    alignSelf: "center",
-    marginTop: 4,
-    marginBottom: 18,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-  },
-  moreRolesText: {
-    color: COLORS.primary,
-    fontSize: 15,
-    fontWeight: "700",
+    width: 118,
+    height: 96,
   },
   primaryButton: {
     height: 56,
     borderRadius: 18,
-    backgroundColor: COLORS.primary,
+    backgroundColor: "#1E3192",
     alignItems: "center",
     justifyContent: "center",
+    marginTop:8,
+    marginBottom: 14,
   },
   primaryButtonText: {
     color: COLORS.white,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "800",
   },
-  footerText: {
-    marginTop: 18,
+  signInText: {
     textAlign: "center",
+    fontSize: 16,
     color: COLORS.muted,
-    fontSize: 14,
+    fontWeight: "500",
   },
-  footerLink: {
+  signInLink: {
     color: COLORS.primary,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });

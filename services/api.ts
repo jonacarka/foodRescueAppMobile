@@ -1,6 +1,6 @@
 import { ApiErrorResponse } from "@/types/auth";
 
-export const API_BASE_URL = "https://unreleasing-thatcher-nonmethodic.ngrok-free.dev/api";
+export const API_BASE_URL = "https://unreleasing-thatcher-nonmethodic.ngrok-free.dev";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
