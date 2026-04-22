@@ -5,15 +5,15 @@ import { saveSession } from "@/utils/storage";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import VerifyEmailCard from "./VerifyEmailCard";
@@ -40,16 +40,14 @@ type Props = {
 };
 
  function getRouteByRole(user:AuthUser){
-    switch(user.role){
-        case "BUSINESS":
-            return "/(business)";
-            case "CUSTOMER":
-                case "NGO":
-                    case "COURIER":
-                        case "ADMIN":
-                            default:
-                                return "/(customer)";
-    }
+  const roleRoutes: Record<string,string> = {
+    BUSINESS:"/(business)/dashboard",
+    CUSTOMER:"/(customer)/home",
+    NGO:"/(customer)/home",
+    COURIER:"/(customer)/home",
+    ADMIN:"/(customer)/home",
+  };
+   return roleRoutes[user.role] || "/(customer)/home";
   }
 
 
