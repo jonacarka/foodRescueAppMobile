@@ -1,9 +1,8 @@
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +10,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 import { listingService } from "@/services/listingService";
 import { Listing } from "@/types/listing";
@@ -295,7 +296,11 @@ function ListingCard({ item }: { item: Listing }) {
     new Date(item.expiresat).getTime() - Date.now() < 1000 * 60 * 60 * 3;
 
   return (
-    <TouchableOpacity activeOpacity={0.9} style={styles.card}>
+    <TouchableOpacity 
+    activeOpacity={0.9} 
+    style={styles.card}
+    onPress={() => router.push(`/(customer)/listings/${item.id}`)}
+    >
       <View style={styles.cardTopRow}>
         <View style={styles.cardMainInfo}>
           <Text style={styles.cardTitle} numberOfLines={1}>
