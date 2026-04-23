@@ -1,14 +1,15 @@
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,20 +19,41 @@ import { formatPickupWindow, formatTimeLeft } from "@/utils/formatDate";
 import { formatPrice } from "@/utils/formatPrice";
 
 const COLORS = {
-  background: "#F7F8FC",
-  surface: "#FFFFFF",
+  bg: "#F6F2E9",
+  cream: "#F7F1E7",
+  creamSoft: "#FBF7F0",
+  white: "#FFFFFF",
   primary: "#0D1A63",
-  primarySoft: "#E9EEFF",
   text: "#111827",
-  textMuted: "#6B7280",
-  border: "#E5E7EB",
-  dangerSoft: "#FFF1F2",
-  dangerText: "#BE123C",
-  successSoft: "#ECFDF3",
-  successText: "#027A48",
-  cream: "#F8F4EC",
-  shadow: "rgba(15, 23, 42, 0.10)",
+  muted: "#6B7280",
+  mutedSoft: "#8C92A3",
+  border: "#ECE6DB",
+  olive: "#7E9A70",
+  oliveDark: "#6C8960",
+  oliveSoft: "#AEBFA2",
+  greenTint: "#E6F1E5",
+  shadow: "rgba(17, 24, 39, 0.08)",
 };
+
+function getHeroImage(category?: string | null) {
+  const c = (category ?? "").toLowerCase();
+
+  if (c.includes("dessert") || c.includes("bakery")) {
+    return {
+      uri: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400&q=80",
+    };
+  }
+
+  if (c.includes("grocery")) {
+    return {
+      uri: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1400&q=80",
+    };
+  }
+
+  return {
+    uri: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=80",
+  };
+}
 
 export default function ListingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -66,30 +88,12 @@ export default function ListingDetailScreen() {
   );
 
   const categoryLabel = useMemo(() => {
-    if (!listing?.category) return "Rescue listing";
+    if (!listing?.category) return "Rescue";
 
     return listing.category
       .replaceAll("_", " ")
       .toLowerCase()
       .replace(/\b\w/g, (char) => char.toUpperCase());
-  }, [listing]);
-
-  const heroAccent = useMemo(() => {
-    const category = (listing?.category ?? "").toLowerCase();
-
-    if (category.includes("dessert") || category.includes("bakery")) {
-      return { bg: "#F7E8E4", circle: "#E8C9C1", plate: "#FFF8F3" };
-    }
-
-    if (category.includes("grocery")) {
-      return { bg: "#E8F2EA", circle: "#BFD8C2", plate: "#F7FCF8" };
-    }
-
-    if (category.includes("surprise")) {
-      return { bg: "#ECE8FA", circle: "#CEC4F5", plate: "#F8F5FF" };
-    }
-
-    return { bg: "#E6EDF8", circle: "#BED0EF", plate: "#F8FBFF" };
   }, [listing]);
 
   const estimatedValue = useMemo(() => {
@@ -102,9 +106,14 @@ export default function ListingDetailScreen() {
     return Math.max(estimatedValue - listing.pricecents, 0);
   }, [estimatedValue, listing]);
 
-  const isExpiringSoon = useMemo(() => {
-    if (!listing) return false;
-    return new Date(listing.expiresat).getTime() - Date.now() < 1000 * 60 * 60 * 3;
+  const pickupText = useMemo(() => {
+    if (!listing) return "";
+    return formatPickupWindow(listing.pickupstartat, listing.pickupendat);
+  }, [listing]);
+
+  const expiresText = useMemo(() => {
+    if (!listing) return "";
+    return formatTimeLeft(listing.expiresat);
   }, [listing]);
 
   const handleReserve = () => {
@@ -112,14 +121,14 @@ export default function ListingDetailScreen() {
 
     Alert.alert(
       "Reserve listing",
-      `You selected "${listing.title}". Next we can connect this to order creation.`
+      `You selected "${listing.title}". Next we can connect this to real order creation.`
     );
   };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar barStyle="light-content" />
         <View style={styles.centerState}>
           <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.stateText}>Loading listing...</Text>
@@ -143,249 +152,196 @@ export default function ListingDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" />
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" />
 
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.hero, { backgroundColor: heroAccent.bg }]}>
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>←</Text>
-          </Pressable>
-
-          <Pressable
-            style={styles.favoriteButton}
-            onPress={() => Alert.alert("Saved", "Save/favorite can be added next.")}
+        <View style={styles.heroWrap}>
+          <ImageBackground
+            source={getHeroImage(listing.category)}
+            style={styles.heroImage}
+            imageStyle={styles.heroImageStyle}
           >
-            <Text style={styles.favoriteButtonText}>♡</Text>
-          </Pressable>
+            <View style={styles.heroOverlay} />
 
-          <View style={[styles.heroCircleLarge, { backgroundColor: heroAccent.circle }]} />
-          <View style={[styles.heroCircleSmall, { backgroundColor: heroAccent.circle }]} />
+            <SafeAreaView edges={["top"]} style={styles.heroSafeArea}>
+              <View style={styles.topActions}>
+                <Pressable style={styles.topIconBtn} onPress={() => router.back()}>
+                  <Text style={styles.topIconText}>←</Text>
+                </Pressable>
 
-          <View style={[styles.plateOuter, { backgroundColor: heroAccent.plate }]}>
-            <View style={styles.plateInner}>
-              <View style={styles.foodCluster}>
-                <View style={[styles.foodBlob, styles.foodBlobGreen]} />
-                <View style={[styles.foodBlob, styles.foodBlobOrange]} />
-                <View style={[styles.foodBlob, styles.foodBlobYellow]} />
-                <View style={[styles.foodBlob, styles.foodBlobDark]} />
-                <View style={[styles.foodBlob, styles.foodBlobLight]} />
+                <Pressable
+                  style={styles.topIconBtn}
+                  onPress={() => Alert.alert("Saved", "Favorites can be added next.")}
+                >
+                  <Text style={styles.topIconText}>♡</Text>
+                </Pressable>
               </View>
-            </View>
-          </View>
+            </SafeAreaView>
+          </ImageBackground>
 
-          <View style={styles.heroBadgeRow}>
-            <View
-              style={[
-                styles.heroBadge,
-                isExpiringSoon ? styles.heroBadgeDanger : styles.heroBadgeNeutral,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.heroBadgeText,
-                  isExpiringSoon ? styles.heroBadgeDangerText : styles.heroBadgeNeutralText,
-                ]}
-              >
-                {formatTimeLeft(listing.expiresat)}
+          <View style={styles.heroInfoBand}>
+            <View style={styles.heroBandLeft}>
+              <Text style={styles.heroBandSmall}>Pickup today</Text>
+              <Text style={styles.heroBandMain}>{pickupText}</Text>
+            </View>
+
+            <View style={styles.heroBandDivider} />
+
+            <View style={styles.heroBandCenter}>
+              <Text style={styles.heroBandSmall}>Expires</Text>
+              <Text style={styles.heroBandMain}>{expiresText}</Text>
+            </View>
+
+            <View style={styles.heroBandDivider} />
+
+            <View style={styles.heroBandRight}>
+              <Text style={styles.heroBandSmall}>Price</Text>
+              <Text style={styles.heroBandMain}>
+                {formatPrice(listing.pricecents, listing.currency)}
               </Text>
-            </View>
-
-            <View style={styles.heroBadgeBlue}>
-              <Text style={styles.heroBadgeBlueText}>{categoryLabel}</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryTopRow}>
-            <View style={styles.summaryTextWrap}>
-              <Text style={styles.listingTitle}>{listing.title}</Text>
+        <View style={styles.body}>
+          <View style={styles.titleRow}>
+            <View style={styles.titleBlock}>
               <Text style={styles.businessName}>{listing.business_name}</Text>
-              <Text style={styles.locationText}>
+              <Text style={styles.title}>{listing.title}</Text>
+              <Text style={styles.subtitle}>
                 {listing.business_city || "Unknown city"}
                 {listing.business_address ? ` • ${listing.business_address}` : ""}
               </Text>
             </View>
 
-            <View style={styles.priceBox}>
-              <Text style={styles.priceLabel}>Rescue price</Text>
-              <Text style={styles.priceValue}>
-                {formatPrice(listing.pricecents, listing.currency)}
-              </Text>
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryBadgeText}>{categoryLabel}</Text>
             </View>
           </View>
 
-          <View style={styles.quickInfoRow}>
-            <InfoPill
+          <View style={styles.metricGrid}>
+            <MetricCard
               label="Pickup"
-              value={formatPickupWindow(listing.pickupstartat, listing.pickupendat)}
+              value={pickupText}
             />
-            <InfoPill label="Quantity" value={`${listing.quantity} ${listing.unit}`} />
+            <MetricCard
+              label="Quantity"
+              value={`${listing.quantity} ${listing.unit}`}
+            />
+            <MetricCard
+              label="Est. value"
+              value={formatPrice(estimatedValue, listing.currency)}
+            />
+            <MetricCard
+              label="You save"
+              value={formatPrice(savings, listing.currency)}
+              accent
+            />
           </View>
 
-          <View style={styles.savingsRow}>
-            <View>
-              <Text style={styles.savingsLabel}>Estimated value</Text>
-              <Text style={styles.savingsValue}>
-                {formatPrice(estimatedValue, listing.currency)}
-              </Text>
-            </View>
-
-            <View style={styles.saveBox}>
-              <Text style={styles.saveBoxLabel}>You save</Text>
-              <Text style={styles.saveBoxValue}>
-                {formatPrice(savings, listing.currency)}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <DetailSection title="About this rescue">
-          <Text style={styles.bodyText}>
-            {listing.description?.trim()
-              ? listing.description
-              : "A rescued food listing available for pickup today."}
-          </Text>
-
-          <View style={styles.metaWrap}>
-            <MetaItem label="Category" value={categoryLabel} />
-            <MetaItem label="Status" value={listing.status} />
-          </View>
-        </DetailSection>
-
-        <DetailSection title="Pickup details">
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Pickup window</Text>
-            <Text style={styles.detailValue}>
-              {formatPickupWindow(listing.pickupstartat, listing.pickupendat)}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>About this rescue</Text>
+            <Text style={styles.sectionText}>
+              {listing.description?.trim()
+                ? listing.description
+                : "A rescued food listing available for pickup today."}
             </Text>
           </View>
 
-          <View style={styles.detailDivider} />
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Pickup details</Text>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Address</Text>
-            <Text style={styles.detailValue}>
-              {listing.business_address || "Address not specified"}
-            </Text>
-          </View>
-
-          <View style={styles.detailDivider} />
-
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>City</Text>
-            <Text style={styles.detailValue}>
-              {listing.business_city || "Unknown city"}
-            </Text>
-          </View>
-        </DetailSection>
-
-        <View style={styles.impactCard}>
-          <Text style={styles.impactTitle}>Why this rescue matters</Text>
-
-          <View style={styles.impactItemsRow}>
-            <ImpactMiniCard title="Save money" subtitle="Get quality food at a lower price." />
-            <ImpactMiniCard title="Reduce waste" subtitle="Help prevent good food from being thrown away." />
-            <ImpactMiniCard title="Support local" subtitle="Back local businesses in your city." />
+            <InfoRow label="Address" value={listing.business_address || "Address not specified"} />
+            <InfoRow label="City" value={listing.business_city || "Unknown city"} />
+            <InfoRow label="Pickup window" value={pickupText} />
           </View>
         </View>
       </ScrollView>
 
-      <View style={styles.bottomBar}>
-        <View>
-          <Text style={styles.bottomBarSmall}>Ready for pickup today</Text>
-          <Text style={styles.bottomBarPrice}>
-            {formatPrice(listing.pricecents, listing.currency)}
-          </Text>
+      <SafeAreaView edges={["bottom"]} style={styles.bottomSafeArea}>
+        <View style={styles.bottomBar}>
+          <View>
+            <Text style={styles.bottomSmall}>Rescue price</Text>
+            <Text style={styles.bottomPrice}>
+              {formatPrice(listing.pricecents, listing.currency)}
+            </Text>
+          </View>
+
+          <Pressable style={styles.reserveButton} onPress={handleReserve}>
+            <Text style={styles.reserveButtonText}>Reserve now</Text>
+          </Pressable>
         </View>
-
-        <Pressable style={styles.reserveButton} onPress={handleReserve}>
-          <Text style={styles.reserveButtonText}>Reserve now</Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
-function DetailSection({
-  title,
-  children,
+function MetricCard({
+  label,
+  value,
+  accent = false,
 }: {
-  title: string;
-  children: React.ReactNode;
+  label: string;
+  value: string;
+  accent?: boolean;
 }) {
   return (
-    <View style={styles.sectionCard}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {children}
+    <View style={[styles.metricCard, accent && styles.metricCardAccent]}>
+      <Text style={[styles.metricLabel, accent && styles.metricLabelAccent]}>
+        {label}
+      </Text>
+      <Text style={[styles.metricValue, accent && styles.metricValueAccent]}>
+        {value}
+      </Text>
     </View>
   );
 }
 
-function InfoPill({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <View style={styles.infoPill}>
-      <Text style={styles.infoPillLabel}>{label}</Text>
-      <Text style={styles.infoPillValue}>{value}</Text>
-    </View>
-  );
-}
-
-function MetaItem({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.metaItem}>
-      <Text style={styles.metaItemLabel}>{label}</Text>
-      <Text style={styles.metaItemValue}>{value}</Text>
-    </View>
-  );
-}
-
-function ImpactMiniCard({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle: string;
-}) {
-  return (
-    <View style={styles.impactMiniCard}>
-      <Text style={styles.impactMiniTitle}>{title}</Text>
-      <Text style={styles.impactMiniSubtitle}>{subtitle}</Text>
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.bg,
   },
-  container: {
+  scroll: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
-  contentContainer: {
-    paddingBottom: 130,
+  scrollContent: {
+    paddingBottom: 120,
   },
+
   centerState: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
+    backgroundColor: COLORS.bg,
   },
   stateText: {
     marginTop: 12,
     fontSize: 15,
-    color: COLORS.textMuted,
+    color: COLORS.muted,
   },
   errorText: {
     fontSize: 15,
-    color: COLORS.dangerText,
+    color: "#B42318",
     textAlign: "center",
     marginBottom: 16,
   },
@@ -401,425 +357,253 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  hero: {
-    height: 360,
-    borderBottomLeftRadius: 34,
-    borderBottomRightRadius: 34,
-    overflow: "hidden",
-    paddingHorizontal: 20,
-    paddingTop: 18,
+  heroWrap: {
+    backgroundColor: COLORS.olive,
+  },
+  heroImage: {
+    height: 430,
     justifyContent: "space-between",
   },
-  backButton: {
-    position: "absolute",
-    top: 18,
-    left: 20,
+  heroImageStyle: {
+    resizeMode: "cover",
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(34, 51, 28, 0.14)",
+  },
+  heroSafeArea: {
+    zIndex: 5,
+  },
+  topActions: {
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  topIconBtn: {
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "rgba(255,255,255,0.92)",
+    backgroundColor: "rgba(255,255,255,0.96)",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 5,
   },
-  backButtonText: {
+  topIconText: {
     fontSize: 22,
     color: COLORS.text,
     fontWeight: "700",
-    marginTop: -2,
+    marginTop: -1,
   },
-  favoriteButton: {
-    position: "absolute",
-    top: 18,
-    right: 20,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(255,255,255,0.92)",
+
+  heroInfoBand: {
+    marginHorizontal: 18,
+    marginTop: -28,
+    backgroundColor: COLORS.oliveDark,
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    zIndex: 5,
-  },
-  favoriteButtonText: {
-    fontSize: 20,
-    color: COLORS.text,
-    fontWeight: "700",
-  },
-  heroCircleLarge: {
-    position: "absolute",
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    right: -30,
-    top: 40,
-    opacity: 0.45,
-  },
-  heroCircleSmall: {
-    position: "absolute",
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    left: -28,
-    bottom: 58,
-    opacity: 0.35,
-  },
-  plateOuter: {
-    alignSelf: "center",
-    marginTop: 44,
-    width: 228,
-    height: 228,
-    borderRadius: 114,
-    alignItems: "center",
-    justifyContent: "center",
     shadowColor: COLORS.shadow,
     shadowOpacity: 1,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 4,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
   },
-  plateInner: {
-    width: 184,
-    height: 184,
-    borderRadius: 92,
-    backgroundColor: "#FFFFFF",
+  heroBandLeft: {
+    flex: 1.15,
+  },
+  heroBandCenter: {
+    flex: 0.9,
     alignItems: "center",
-    justifyContent: "center",
   },
-  foodCluster: {
-    width: 118,
-    height: 118,
-    position: "relative",
+  heroBandRight: {
+    flex: 1,
+    alignItems: "flex-end",
   },
-  foodBlob: {
-    position: "absolute",
-    borderRadius: 999,
+  heroBandDivider: {
+    width: 1,
+    alignSelf: "stretch",
+    backgroundColor: "rgba(255,255,255,0.16)",
+    marginHorizontal: 12,
   },
-  foodBlobGreen: {
-    width: 64,
-    height: 38,
-    backgroundColor: "#7DAE7A",
-    top: 6,
-    left: 24,
-    transform: [{ rotate: "-14deg" }],
+  heroBandSmall: {
+    fontSize: 11,
+    color: "rgba(255,255,255,0.72)",
+    marginBottom: 4,
   },
-  foodBlobOrange: {
-    width: 54,
-    height: 24,
-    backgroundColor: "#E49A58",
-    top: 38,
-    left: 8,
-    transform: [{ rotate: "28deg" }],
+  heroBandMain: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#FFFFFF",
   },
-  foodBlobYellow: {
-    width: 44,
-    height: 24,
-    backgroundColor: "#E8C86A",
-    top: 56,
-    right: 4,
-    transform: [{ rotate: "-18deg" }],
+
+  body: {
+    marginTop: 14,
+    backgroundColor: COLORS.cream,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 18,
+    paddingTop: 22,
+    paddingBottom: 32,
   },
-  foodBlobDark: {
-    width: 48,
-    height: 28,
-    backgroundColor: "#8A684A",
-    bottom: 10,
-    left: 20,
-    transform: [{ rotate: "14deg" }],
-  },
-  foodBlobLight: {
-    width: 52,
-    height: 32,
-    backgroundColor: "#CBE1BA",
-    bottom: 22,
-    right: 18,
-    transform: [{ rotate: "-28deg" }],
-  },
-  heroBadgeRow: {
+
+  titleRow: {
     flexDirection: "row",
+    alignItems: "flex-start",
     justifyContent: "space-between",
-    marginBottom: 28,
+    gap: 12,
+    marginBottom: 20,
   },
-  heroBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
+  titleBlock: {
+    flex: 1,
   },
-  heroBadgeText: {
-    fontSize: 12,
+  businessName: {
+    fontSize: 13,
+    color: COLORS.oliveDark,
     fontWeight: "700",
+    marginBottom: 6,
+    letterSpacing: 0.2,
   },
-  heroBadgeDanger: {
-    backgroundColor: COLORS.dangerSoft,
-  },
-  heroBadgeDangerText: {
-    color: COLORS.dangerText,
-  },
-  heroBadgeNeutral: {
-    backgroundColor: "rgba(255,255,255,0.85)",
-  },
-  heroBadgeNeutralText: {
+  title: {
+    fontSize: 33,
+    lineHeight: 37,
     color: COLORS.text,
+    fontWeight: "800",
+    marginBottom: 8,
   },
-  heroBadgeBlue: {
+  subtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: COLORS.muted,
+  },
+  categoryBadge: {
     backgroundColor: COLORS.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
     borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    marginTop: 6,
   },
-  heroBadgeBlueText: {
+  categoryBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "700",
   },
 
-  summaryCard: {
-    marginTop: -28,
-    marginHorizontal: 20,
-    backgroundColor: COLORS.surface,
-    borderRadius: 28,
-    padding: 18,
+  metricGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 12,
+    marginBottom: 24,
+  },
+  metricCard: {
+    width: "48.3%",
+    backgroundColor: COLORS.creamSoft,
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 1,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 4,
   },
-  summaryTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 14,
-    marginBottom: 16,
+  metricCardAccent: {
+    backgroundColor: COLORS.greenTint,
+    borderColor: "#D4E7D2",
   },
-  summaryTextWrap: {
-    flex: 1,
-  },
-  listingTitle: {
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: "800",
-    color: COLORS.text,
+  metricLabel: {
+    fontSize: 12,
+    color: COLORS.mutedSoft,
     marginBottom: 6,
   },
-  businessName: {
+  metricLabelAccent: {
+    color: "#227A4D",
+  },
+  metricValue: {
     fontSize: 15,
-    fontWeight: "700",
-    color: COLORS.primary,
-    marginBottom: 4,
-  },
-  locationText: {
-    fontSize: 13,
-    lineHeight: 18,
-    color: COLORS.textMuted,
-  },
-  priceBox: {
-    minWidth: 108,
-    backgroundColor: COLORS.primarySoft,
-    borderRadius: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    alignItems: "flex-end",
-    justifyContent: "center",
-  },
-  priceLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginBottom: 4,
-  },
-  priceValue: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: COLORS.primary,
-  },
-  quickInfoRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 14,
-  },
-  infoPill: {
-    flex: 1,
-    backgroundColor: COLORS.cream,
-    borderRadius: 18,
-    padding: 12,
-  },
-  infoPillLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginBottom: 5,
-  },
-  infoPillValue: {
-    fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 20,
     color: COLORS.text,
-    fontWeight: "700",
-  },
-  savingsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  savingsLabel: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    marginBottom: 4,
-  },
-  savingsValue: {
-    fontSize: 15,
-    color: COLORS.text,
-    fontWeight: "700",
-  },
-  saveBox: {
-    backgroundColor: COLORS.successSoft,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    alignItems: "flex-end",
-  },
-  saveBoxLabel: {
-    fontSize: 11,
-    color: COLORS.successText,
-    marginBottom: 4,
-  },
-  saveBoxValue: {
-    fontSize: 15,
     fontWeight: "800",
-    color: COLORS.successText,
+  },
+  metricValueAccent: {
+    color: "#0E7A46",
   },
 
-  sectionCard: {
-    marginTop: 18,
-    marginHorizontal: 20,
-    backgroundColor: COLORS.surface,
-    borderRadius: 24,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+  section: {
+    marginBottom: 22,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "800",
     color: COLORS.text,
-    marginBottom: 14,
+    fontWeight: "800",
+    marginBottom: 10,
   },
-  bodyText: {
+  sectionText: {
     fontSize: 14,
     lineHeight: 22,
-    color: COLORS.textMuted,
-  },
-  metaWrap: {
-    marginTop: 16,
-    gap: 10,
-  },
-  metaItem: {
-    backgroundColor: "#FAFBFF",
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  metaItemLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginBottom: 4,
-  },
-  metaItemValue: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: COLORS.text,
+    color: COLORS.muted,
   },
 
-  detailRow: {
-    gap: 6,
+  infoRow: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  detailLabel: {
+  infoLabel: {
     fontSize: 12,
-    color: COLORS.textMuted,
+    color: COLORS.mutedSoft,
+    marginBottom: 5,
   },
-  detailValue: {
+  infoValue: {
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 20,
     color: COLORS.text,
     fontWeight: "700",
   },
-  detailDivider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 14,
-  },
 
-  impactCard: {
-    marginTop: 18,
-    marginHorizontal: 20,
-  },
-  impactTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: COLORS.text,
-    marginBottom: 12,
-  },
-  impactItemsRow: {
-    gap: 12,
-  },
-  impactMiniCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  impactMiniTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: COLORS.text,
-    marginBottom: 6,
-  },
-  impactMiniSubtitle: {
-    fontSize: 13,
-    lineHeight: 20,
-    color: COLORS.textMuted,
-  },
-
-  bottomBar: {
+  bottomSafeArea: {
     position: "absolute",
-    left: 16,
-    right: 16,
-    bottom: 14,
-    backgroundColor: COLORS.surface,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "transparent",
+  },
+  bottomBar: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    backgroundColor: "rgba(255,255,255,0.98)",
     borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 14,
-    paddingLeft: 16,
+    borderColor: "#ECECEC",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     shadowColor: COLORS.shadow,
     shadowOpacity: 1,
-    shadowRadius: 18,
+    shadowRadius: 16,
     shadowOffset: { width: 0, height: 10 },
     elevation: 8,
   },
-  bottomBarSmall: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginBottom: 3,
+  bottomSmall: {
+    fontSize: 12,
+    color: COLORS.muted,
+    marginBottom: 4,
   },
-  bottomBarPrice: {
+  bottomPrice: {
     fontSize: 20,
-    fontWeight: "800",
     color: COLORS.text,
+    fontWeight: "800",
   },
   reserveButton: {
     backgroundColor: COLORS.primary,
-    borderRadius: 18,
-    paddingHorizontal: 22,
-    paddingVertical: 14,
+    borderRadius: 22,
+    paddingHorizontal: 26,
+    paddingVertical: 15,
   },
   reserveButtonText: {
     color: "#FFFFFF",
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "800",
   },
 });
