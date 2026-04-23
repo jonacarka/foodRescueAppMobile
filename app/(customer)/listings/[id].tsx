@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   ImageBackground,
+  Modal,
   Pressable,
   ScrollView,
   StatusBar,
@@ -19,19 +20,23 @@ import { formatPickupWindow, formatTimeLeft } from "@/utils/formatDate";
 import { formatPrice } from "@/utils/formatPrice";
 
 const COLORS = {
-  bg: "#F6F2E9",
-  cream: "#F7F1E7",
-  creamSoft: "#FBF7F0",
-  white: "#FFFFFF",
+  bg: "#f6f2e9",
+  // cream: "#F7F1E7",
+  // creamSoft: "#FBF7F0",
+  card:"#FFFDF9",
+  cardSoft:"#FBF7F1",
+  // white: "#FFFFFF",
   primary: "#0D1A63",
-  text: "#111827",
-  muted: "#6B7280",
-  mutedSoft: "#8C92A3",
-  border: "#ECE6DB",
-  olive: "#7E9A70",
-  oliveDark: "#6C8960",
-  oliveSoft: "#AEBFA2",
-  greenTint: "#E6F1E5",
+  primarySoft:"#EAF0FF",
+  primarySoftStrong:"#DCE6FF",
+  text: "#0B1437",
+  muted: "#7B8194",
+  mutedSoft: "#9AA1B5",
+  border: "#E7DED0",
+  ribbon:"#162D87",
+  ribbonText:"#FFFFFF",
+  savingsBg:"#EEF3FF",
+  savingsText:"#294891",
   shadow: "rgba(17, 24, 39, 0.08)",
 };
 
@@ -61,6 +66,13 @@ export default function ListingDetailScreen() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [detailsVisible,setDetailsVisible]=useState(false);
+  const[detailsTab,setDetailsTab]=useState<"about" | "pickup" | "value">("about");
+
+  const openDetails = (tab:"about" | "pickup" | "value") =>{
+    setDetailsTab(tab);
+    setDetailsVisible(true);
+  };
 
   const loadListing = useCallback(async () => {
     if (!id || typeof id !== "string") {
@@ -244,23 +256,21 @@ export default function ListingDetailScreen() {
             />
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About this rescue</Text>
-            <Text style={styles.sectionText}>
+          <View style={styles.quickActionsRow}>
+            <QuickAction label="About" onPress={() => openDetails("about")} />
+            <QuickAction label="Pickup info" onPress={() => openDetails("pickup")} />
+            <QuickAction label="Value" onPress={() => openDetails("value")} />
+          </View>
+
+          <View style={styles.quickSummaryCard}>
+            <Text style={styles.quickSummaryTitle}>Quick note</Text>
+            <Text style={styles.quickSummaryText} numberOfLines={2}>
               {listing.description?.trim()
-                ? listing.description
-                : "A rescued food listing available for pickup today."}
+              ? listing.description
+            : "A lower-cost evening meal combo for quick pickup"}
             </Text>
           </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Pickup details</Text>
-
-            <InfoRow label="Address" value={listing.business_address || "Address not specified"} />
-            <InfoRow label="City" value={listing.business_city || "Unknown city"} />
-            <InfoRow label="Pickup window" value={pickupText} />
           </View>
-        </View>
       </ScrollView>
 
       <SafeAreaView edges={["bottom"]} style={styles.bottomSafeArea}>
@@ -277,7 +287,118 @@ export default function ListingDetailScreen() {
           </Pressable>
         </View>
       </SafeAreaView>
+
+      <Modal
+      visible={detailsVisible}
+      transparent
+      animationType="slide"
+      onRequestClose={() => setDetailsVisible(false)}
+      >
+        <View style={{flex:1,justifyContent:"flex-end"}}>
+        <Pressable
+        style={styles.sheetBackdrop}
+        onPress={() => setDetailsVisible(false)}
+        />
+
+        <View style={styles.sheetContainer}>
+          <View style = {styles.sheetHandle}/>
+
+          <View style={styles.sheetTabs}>
+            <Pressable
+            style={[
+              styles.sheetTab,
+              detailsTab === "about" && styles.sheetTabActive,
+            ]}
+            onPress={() => setDetailsTab("about")}
+            >
+              <Text
+              style={[
+                styles.sheetTabText,
+                detailsTab === "about" && styles.sheetTabTextActive,
+              ]}
+              >
+                About
+              </Text>
+            </Pressable>
+
+            <Pressable
+            style={[
+              styles.sheetTab,
+              detailsTab==="pickup" && styles.sheetTabActive,
+            ]}
+            onPress={() => setDetailsTab("pickup")}
+            >
+              <Text
+              style={[
+                styles.sheetTabText,
+                detailsTab === "pickup" && styles.sheetTabTextActive,
+
+              ]}
+              >
+                Pickup
+              </Text>
+            </Pressable>
+
+            <Pressable
+            style={[
+              styles.sheetTab,
+              detailsTab==="value" && styles.sheetTabActive,
+            ]}
+            onPress={() => setDetailsTab("value")}
+            >
+              <Text
+              style={[
+                styles.sheetTabText,
+                detailsTab === "value" && styles.sheetTabTextActive,
+              ]}
+              >
+                Value
+              </Text>
+            </Pressable>
+          </View>
+
+          {detailsTab === "about" &&(
+            <View>
+              <Text style ={styles.sheetTitle}>About this rescue</Text>
+              <Text style={styles.sheetBodyText}>
+                {listing.description?.trim()
+                ? listing.description
+                : "A rescued food listing available for pickup today"}
+              </Text>
+              </View>
+          )}
+
+          {detailsTab === "pickup" && (
+            <View>
+              <Text style={styles.sheetTitle}>Pickup details</Text>
+              <InfoRow label="Address" value={listing.business_address || "Adress not specified"} />
+              <InfoRow label="City" value={listing.business_city || "Unknown city"} />
+              <InfoRow label="Pickup window" value={pickupText} />
+              </View>
+          )}
+
+          {detailsTab === "value" && (
+            <View>
+              <Text style={styles.sheetTitle}>Rescue Value</Text>
+              <InfoRow
+              label="Estimated value"
+              value={formatPrice(estimatedValue,listing.currency)}
+              />
+              <InfoRow
+              label="Rescue price"
+              value={formatPrice(listing.pricecents,listing.currency)}
+              />
+              <InfoRow
+              label="You save"
+              value={formatPrice(savings,listing.currency)}
+              />
+              </View>
+          )}
+        </View>
+        </View>
+      </Modal>
     </View>
+    
   );
 }
 
@@ -308,6 +429,20 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={styles.infoValue}>{value}</Text>
     </View>
+  );
+}
+
+function QuickAction({
+  label,
+  onPress,
+}:{
+  label:string;
+  onPress: () => void;
+}) {
+  return(
+    <Pressable style={styles.quickAction} onPress={onPress}>
+      <Text style={styles.quickActionText}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -358,11 +493,44 @@ const styles = StyleSheet.create({
   },
 
   heroWrap: {
-    backgroundColor: COLORS.olive,
+    backgroundColor: COLORS.bg,
   },
   heroImage: {
-    height: 430,
+    height: 390,
     justifyContent: "space-between",
+  },
+  heroInfoBand:{
+    marginHorizontal:20,
+    marginTop: -30,
+    backgroundColor:COLORS.ribbon,
+    borderRadius:24,
+    paddingVertical:16,
+    paddingHorizontal:18,
+    borderWidth:4,
+    borderColor:COLORS.bg,
+    zIndex:4,
+    shadowColor:COLORS.shadow,
+    shadowOpacity:1,
+    shadowRadius:14,
+    shadowOffset:{width:0,height:8},
+    elevation:5,
+  },
+  heroBandDivider:{
+    width:1,
+    alignSelf:"stretch",
+    backgroundColor:"rgba(255,255,255,0.18)",
+    marginHorizontal:12,
+
+  },
+  heroBandSmall:{
+    fontSize:12,
+    color:"rgba(255,255,255,0.72)",
+    marginBottom:4,
+  },
+  heroBandMain:{
+    fontSize:15,
+    fontWeight:"800",
+    color:COLORS.ribbonText,
   },
   heroImageStyle: {
     resizeMode: "cover",
@@ -394,22 +562,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: -1,
   },
-
-  heroInfoBand: {
-    marginHorizontal: 18,
-    marginTop: -28,
-    backgroundColor: COLORS.oliveDark,
-    borderRadius: 18,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 1,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
-  },
   heroBandLeft: {
     flex: 1.15,
   },
@@ -421,31 +573,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "flex-end",
   },
-  heroBandDivider: {
-    width: 1,
-    alignSelf: "stretch",
-    backgroundColor: "rgba(255,255,255,0.16)",
-    marginHorizontal: 12,
-  },
-  heroBandSmall: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.72)",
-    marginBottom: 4,
-  },
-  heroBandMain: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#FFFFFF",
-  },
-
   body: {
-    marginTop: 14,
-    backgroundColor: COLORS.cream,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    marginTop: -18,
+    backgroundColor: COLORS.bg,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
     paddingHorizontal: 18,
-    paddingTop: 22,
-    paddingBottom: 32,
+    paddingTop: 46,
+    paddingBottom: 24,
   },
 
   titleRow: {
@@ -459,35 +594,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   businessName: {
-    fontSize: 13,
-    color: COLORS.oliveDark,
-    fontWeight: "700",
+    fontSize: 15,
+    color: COLORS.primary,
+    fontWeight: "800",
     marginBottom: 6,
     letterSpacing: 0.2,
   },
   title: {
-    fontSize: 33,
-    lineHeight: 37,
+    fontSize: 30,
+    lineHeight: 35,
     color: COLORS.text,
     fontWeight: "800",
     marginBottom: 8,
+    letterSpacing:-0.5,
   },
   subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 21,
     color: COLORS.muted,
   },
   categoryBadge: {
     backgroundColor: COLORS.primary,
     borderRadius: 999,
     paddingHorizontal: 14,
-    paddingVertical: 9,
-    marginTop: 6,
+    paddingVertical: 10,
+    marginTop: 4,
   },
   categoryBadgeText: {
     color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 
   metricGrid: {
@@ -499,16 +635,16 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     width: "48.3%",
-    backgroundColor: COLORS.creamSoft,
-    borderRadius: 18,
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
     paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   metricCardAccent: {
-    backgroundColor: COLORS.greenTint,
-    borderColor: "#D4E7D2",
+    backgroundColor: COLORS.savingsBg,
+    borderColor: COLORS.primarySoftStrong,
   },
   metricLabel: {
     fontSize: 12,
@@ -516,7 +652,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   metricLabelAccent: {
-    color: "#227A4D",
+    color:COLORS.savingsText,
   },
   metricValue: {
     fontSize: 15,
@@ -525,7 +661,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   metricValueAccent: {
-    color: "#0E7A46",
+    color:COLORS.savingsText,
   },
 
   section: {
@@ -544,7 +680,7 @@ const styles = StyleSheet.create({
   },
 
   infoRow: {
-    paddingVertical: 12,
+    paddingVertical: 13,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
@@ -571,11 +707,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 10,
     backgroundColor: "rgba(255,255,255,0.98)",
-    borderRadius: 24,
+    borderRadius: 26,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: "#ECECEC",
+    borderColor: "#ECE7DB",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -591,19 +727,115 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   bottomPrice: {
-    fontSize: 20,
+    fontSize: 19,
     color: COLORS.text,
     fontWeight: "800",
   },
   reserveButton: {
     backgroundColor: COLORS.primary,
     borderRadius: 22,
-    paddingHorizontal: 26,
+    paddingHorizontal: 24,
     paddingVertical: 15,
   },
   reserveButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "800",
+  },
+  quickActionsRow:{
+    flexDirection:"row",
+    gap:10,
+    marginBottom:14,
+  },
+  quickAction:{
+    flex:1,
+    backgroundColor:COLORS.card,
+    borderRadius:999,
+    paddingVertical:12,
+    alignItems:"center",
+    justifyContent:"center",
+    borderWidth:1,
+    borderColor:COLORS.border,
+  },
+
+  quickActionText:{
+    fontSize:13,
+    color:COLORS.primary,
+    fontWeight:"700",
+  },
+  quickSummaryCard:{
+    backgroundColor:COLORS.cardSoft,
+    borderRadius:20,
+    padding:15,
+    borderWidth:1,
+    borderColor:COLORS.border,
+  },
+  quickSummaryTitle:{
+    fontSize:12,
+    color:COLORS.mutedSoft,
+    marginBottom:6,
+  },
+  quickSummaryText:{
+    fontSize:14,
+    lineHeight:21,
+    color:COLORS.text,
+    fontWeight:"500",
+  },
+  sheetBackdrop:{
+    flex:1,
+    backgroundColor:"rgba(0,0,0,0.26)",
+  },
+  sheetContainer:{
+    backgroundColor:COLORS.card,
+    borderTopLeftRadius:28,
+    borderTopRightRadius:28,
+    paddingHorizontal:18,
+    paddingTop:12,
+    paddingBottom:28,
+  },
+  sheetHandle:{
+    width:46,
+    height:5,
+    borderRadius:999,
+    backgroundColor:"#D9D2C6",
+    alignSelf:"center",
+    marginBottom:16,
+  },
+  sheetTabs:{
+    flexDirection:"row",
+    gap:8,
+    marginBottom:18,
+  },
+  sheetTab:{
+    flex:1,
+    backgroundColor:COLORS.cardSoft,
+    borderRadius:999,
+    paddingVertical:11,
+    alignItems:"center",
+    borderWidth:1,
+    borderColor:COLORS.border,
+  },
+  sheetTabActive:{
+    backgroundColor:COLORS.primary,
+    borderColor:COLORS.primary,
+  },
+  sheetTabText:{
+    fontSize:13,
+    fontWeight:"700",
+    color:COLORS.primary,
+  },
+  sheetTabTextActive:{
+    color:"#FFFFFF",
+  },
+  sheetTitle:{
+    fontSize:18,
+    fontWeight:"800",
+    color:COLORS.text,
+    marginBottom:10,
+  },
+  sheetBodyText:{
+    fontSize:14,
+    lineHeight:22,
+    color:COLORS.muted,
   },
 });
