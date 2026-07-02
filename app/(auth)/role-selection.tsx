@@ -423,7 +423,7 @@ const handleContinue = () =>{
             }
           }}
         >
-          <Pressable
+          {/* <Pressable
             onPress={() => rotateRelative(-1)}
             hitSlop={12}
             style={[styles.sideControl, styles.leftControl]}
@@ -431,7 +431,7 @@ const handleContinue = () =>{
             accessibilityLabel="Zgjidh rolin e mëparshëm"
           >
             <Ionicons name="chevron-back" size={20} color={COLORS.cream} />
-          </Pressable>
+          </Pressable> */}
 
           <GestureDetector gesture={wheelGesture}>
             <View style={styles.gestureBox}>
@@ -454,7 +454,7 @@ const handleContinue = () =>{
               </View>
             </View>
           </GestureDetector>
-
+{/* 
           <Pressable
             onPress={() => rotateRelative(1)}
             hitSlop={12}
@@ -463,7 +463,7 @@ const handleContinue = () =>{
             accessibilityLabel="Zgjidh rolin tjetër"
           >
             <Ionicons name="chevron-forward" size={20} color={COLORS.cream} />
-          </Pressable>
+          </Pressable> */}
         </View>
 
         <View style={styles.confirmCard}>
